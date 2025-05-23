@@ -1,6 +1,9 @@
-import { Form, json, Link, useLoaderData } from '@remix-run/react';
+import { Form, json, Link, useActionData, useLoaderData } from '@remix-run/react';
 import {redirect} from '@shopify/remix-oxygen';
 import {useNavigate} from '@remix-run/react';
+import { useEffect } from 'react';
+
+
 export async function loader({context}) {
   const query = `
     query GetWelcomePage {
@@ -22,7 +25,7 @@ export async function loader({context}) {
               }
             }
           }
-        }
+        } 
       }
     }
   `;
@@ -93,7 +96,7 @@ export const action = async ({ request, context }) => {
   });
 
 
-  const { data } = val;
+  const { data } = val;   
 
   const errors = data?.customerCreate?.customerUserErrors;
   if (errors?.length) {
@@ -108,9 +111,11 @@ export const action = async ({ request, context }) => {
     formData.set('email', '');
     formData.set('password', '');
  
-  }
+  } 
 
-   return redirect('/');
+  // const customerId = data?.customerCreate?.customer?.id;
+
+  return json({id: val?.customerCreate?.customer?.id});
 };
 
 // export const action = async ({ request }) => {
@@ -126,6 +131,31 @@ export default function Signup() {
 
       const data = useLoaderData();
       const meta = data?.metaobject;
+      const actionData = useActionData(); 
+
+      const Navigate = useNavigate();
+
+      useEffect(() => {
+        const token = localStorage.getItem('token');
+        if(token){
+          console.log("Token: ", token);
+          Navigate("/");
+        }
+        else{
+          // navigate('/signup');
+        }
+      }
+      ,[])
+
+      useEffect(() => {
+        console.log("Action Data: ", actionData);
+        if (actionData?.id) {
+          localStorage.setItem('token', actionData.id);
+          window.location.href = '/'; // Redirect manually on client
+        }
+      }, [actionData]);
+
+
       const {
         title: {value: title} = {},
         desc: {value: desc} = {}, 
