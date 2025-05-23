@@ -1,7 +1,8 @@
 import {Await, useLoaderData, Link} from '@remix-run/react';
-import {Suspense} from 'react';
+import {Suspense, useEffect} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
+import {useNavigate} from '@remix-run/react';
 
 /**
  * @type {MetaFunction}
@@ -12,7 +13,7 @@ export const meta = () => {
 
 /**
  * @param {LoaderFunctionArgs} args 
- */
+ */ 
 export async function loader(args) {
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
@@ -85,6 +86,20 @@ async function loadAllCollectionsData({context}) {
 export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
+
+
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    const token = localStorage.getItem('token');
+    if(token){
+      console.log("Token: ", token);
+    }
+    else{
+      // navigate('/signup');
+    }
+  },[])
+
   // console.log("Datas: ",data);
   return (
     <div className="home">
