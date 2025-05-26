@@ -93,51 +93,6 @@ function loadDeferredData({context, params}) {
 }
 
 
-// async function addToCart({context, params}){
-
-
-
-//   if(flag){
-//     console.log("Added to cart");
-//     const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6';
-    
-//       if (!customerAccessToken) {
-//         console.warn('No customer access token found. Returning empty wishlist.');
-//         return json({ wishlist: [] });
-//       }
-    
-//       const query = `#graphql
-//       query GetCustomerWishlist($customerAccessToken: String!) {
-//         customer(customerAccessToken: $customerAccessToken) {
-//           id
-//           email
-//           firstName
-//           lastName
-//           metafield(namespace: "custom", key: "wishl") {
-//             value 
-//           }
-//         }
-//       }
-//     `; 
-    
-//         const response = await context.storefront.query(query, {
-//           variables: { customerAccessToken },
-//         });
-    
-//         const parsedWishlist = response?.customer?.metafield?.value
-//           ? JSON.parse(response.customer.metafield.value)
-//           : [];
-//         console.log("Parsed Wishlist:", parsedWishlist);
-//   } else {
-//     console.log("Please wait before adding another item to the cart");
-//   }
-
-//   flag = !flag;
-// }
-
-
-
-
 export default function Product() {
   
 
@@ -156,7 +111,7 @@ export default function Product() {
   };
 
   console.log("Product to save: ",productToSave);
-  // console.log("Product: ",product);
+  console.log("Product: ",product);
   const data = useLoaderData();
   // console.log("Data: ",data);11
 
@@ -193,12 +148,21 @@ export default function Product() {
 
     console.log("flag: ",flag); 
      if(flag){ 
-      // data.push(productToSave);
+      data.push(productToSave);
+
+      const updatedResponse = await fetch('/addToWishList', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({wishlist: data}),
+      });
+      const updatedData = await updatedResponse.json(); 
       console.log('Fetched Wishlist:', data);
     }
       else{
         // console.log("Please wait before adding another item to the cart");
-        // data = data.filter(item => item.productId !== productToSave.id);
+        data = data.filter(item => item.productId !== productToSave.id);
         console.log('Updated Wishlist:', data);
       }
       // flag = !flag;

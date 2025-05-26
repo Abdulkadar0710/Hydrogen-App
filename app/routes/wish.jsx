@@ -17,9 +17,9 @@ export async function loader({ context, request }) {
         }
       }
     }
-  `;
+  `;  
 
-  const response = await context.storefront.query(QUERY, {
+  const response = await context.storefront.query(QUERY, { 
     variables: { customerAccessToken },
   });
 

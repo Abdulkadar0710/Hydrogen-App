@@ -22,7 +22,7 @@ import { CiHeart } from "react-icons/ci";
         const data = await response.json();
         const wishlist = JSON.parse(data.customer?.metafield?.value || '[]');
         wishlist.push({
-          productId,
+          productId, 
           title: 'New Wishlist Item',
         });
   
@@ -30,7 +30,7 @@ import { CiHeart } from "react-icons/ci";
         setIsWishlisted(true);
       } else {
         console.log("Please wait before adding another item to the cart");
-      }
+      } 
     };
     
    return (
