@@ -110,8 +110,8 @@ export default function Product() {
     handle: currentProduct.handle,
   };
 
-  console.log("Product to save: ",productToSave);
-  console.log("Product: ",product);
+  // console.log("Product to save: ",productToSave);
+  // console.log("Product: ",product);
   const data = useLoaderData();
   // console.log("Data: ",data);11
 
@@ -148,7 +148,8 @@ export default function Product() {
 
     console.log("flag: ",flag); 
      if(flag){ 
-      data.push(productToSave);
+       data.push(productToSave);
+       console.log("Adding to wishlist", data);
 
       const updatedResponse = await fetch('/addToWishList', {
         method: 'POST',
@@ -158,7 +159,7 @@ export default function Product() {
         body: JSON.stringify({wishlist: data}),
       });
       const updatedData = await updatedResponse.json(); 
-      console.log('Fetched Wishlist:', data);
+      console.log('Fetched Wishlist:', updatedData);
     }
       else{
         // console.log("Please wait before adding another item to the cart");

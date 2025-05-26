@@ -9,40 +9,40 @@ export async function action({ context, request }) {
 
   const body = await request.json(); // Expecting { wishlist: [...] }
   const wishlistData = JSON.stringify(body?.wishlist || []);
+  console.log("Wishlist Data: ", wishlistData);
 
-  const MUTATION = `#graphql
-    mutation UpdateCustomerWishlist($customerAccessToken: String!, $metafields: [MetafieldsSetInput!]!) {
-      customerUpdate(
-        customerAccessToken: $customerAccessToken,
-        customer: {
-          metafields: $metafields
-        }
-      ) {
-        customer {
-          id
-          metafield(namespace: "custom", key: "wishl") {
-            value
-          }
-        }
-        userErrors {
-          field
-          message
-        }
+  const MUTATION = `
+  mutation UpdateCustomerWishlist($customerAccessToken: String!, $metafields: [MetafieldInput!]!) {
+  customerUpdate(
+    customerAccessToken: $customerAccessToken
+    customer: {metafields: $metafields}
+  ) {
+    customer {
+      id
+      metafield(namespace: "custom", key: "wishl") {
+        value
       }
+    } 
+    userErrors {
+      field
+      message
     }
-  `;
+  }
+}
+`;
 
-  const variables = {
-    customerAccessToken,
-    metafields: [
-      {
-        namespace: 'custom',
-        key: 'wishl',
-        value: wishlistData,
-        type: 'json',
-      },
-    ],
-  };
+const variables = {
+  customerAccessToken,
+  metafields: [
+    {
+      namespace: "custom",
+      key: "wishl",
+      value: wishlistData, // Should be a JSON string, e.g. JSON.stringify([...])
+      type: "json" // Ensure the type matches your metafield definition in Shopify
+    }
+  ]
+};
+
 
   const response = await context.storefront.mutate(MUTATION, {
     variables,
