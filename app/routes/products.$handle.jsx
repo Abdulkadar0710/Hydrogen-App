@@ -12,7 +12,11 @@ import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
-let flag = true;
+import { CiHeart } from "react-icons/ci";
+import { FaHeart } from "react-icons/fa";
+import { useState } from 'react';
+
+
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -36,69 +40,12 @@ export async function loader(args) {
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
-  
-  // const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6';
-  
-  //   if (!customerAccessToken) {
-  //     console.warn('No customer access token found. Returning empty wishlist.');
-  //     return json({ wishlist: [] });
-  //   }
-  
-  //   const query = `#graphql
-  //   query GetCustomerWishlist($customerAccessToken: String!) {
-  //     customer(customerAccessToken: $customerAccessToken) {
-  //       id
-  //       email
-  //       firstName
-  //       lastName
-  //       metafield(namespace: "custom", key: "wishl") {
-  //         value 
-  //       }
-  //     }
-  //   }
-  // `;
-   
-   
-  
-  //     const response = await context.storefront.query(query, {
-  //       variables: { customerAccessToken }, 
-  //     });
-  
-  //     const parsedWishlist = response?.customer?.metafield?.value
-  //       ? JSON.parse(response.customer.metafield.value)
-  //       : []; 
-  //     console.log("Parsed Wishlist:", ...parsedWishlist);
+  const criticalData = await loadCriticalData(args);   
 
-  //     const deferredWishlist = {
-  //       wishlist: parsedWishlist,
-  //     };
 
   return {...deferredData, ...criticalData}; 
 }
 
-const addToCart = async () => {
-  try {
-    const response = await fetch('/wish', { // Changed from './api/wish'
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'},
-    });
-    let data = await response.json();
-    data = JSON.parse(data.customer?.metafield?.value);
-
-    data.push({
-      productId: 'gid://shopify/Product/1234567890', // Example product ID
-      title: 'New Wishlist Item'
-    });
-    console.log('Fetched Wishlist:', data);
-
-    
-
-  } catch (error) {
-    console.error('Failed to fetch wishlist:', error); 
-  }
-};
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
@@ -192,12 +139,26 @@ function loadDeferredData({context, params}) {
 
 
 export default function Product() {
+  
+
+  const [flag, setFlag] = useState(true);
+
   /** @type {LoaderReturnData} */
   const {product} = useLoaderData();
+  const [currentProduct, setCurrentProduct] = useState(product);
 
-  console.log("Product: ",product);
+  const productToSave = {
+    id: currentProduct.id,
+    title: currentProduct.title,
+    vendor: currentProduct.vendor, 
+    description: currentProduct.description,
+    handle: currentProduct.handle,
+  };
+
+  console.log("Product to save: ",productToSave);
+  // console.log("Product: ",product);
   const data = useLoaderData();
-  console.log("Data: ",data);
+  // console.log("Data: ",data);11
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -217,6 +178,36 @@ export default function Product() {
 
   const {title, descriptionHtml} = product;
 
+
+
+
+  const addToCart = async () => {
+
+    const response = await fetch('/wish', { // Changed from './api/wish'
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'},
+    });
+    let data = await response.json();
+    data = JSON.parse(data.customer?.metafield?.value) || [];
+
+    console.log("flag: ",flag); 
+     if(flag){ 
+      // data.push(productToSave);
+      console.log('Fetched Wishlist:', data);
+    }
+      else{
+        // console.log("Please wait before adding another item to the cart");
+        // data = data.filter(item => item.productId !== productToSave.id);
+        console.log('Updated Wishlist:', data);
+      }
+      // flag = !flag;
+      setFlag(!flag); 
+  
+  };
+  
+
+
   return (
     <div className="product">
       <ProductImage image={selectedVariant?.image} />
@@ -233,7 +224,7 @@ export default function Product() {
         /> */}
         <div className="addToCart" 
         onClick={addToCart}
-        >Add To Cart</div>
+        >Add To Cart { flag==true ? <CiHeart /> : <FaHeart />}</div>
         <br />
         <br />
         <p>
