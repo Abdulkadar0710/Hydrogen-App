@@ -1,5 +1,6 @@
 import { Form, json, Link, useLoaderData, useActionData } from '@remix-run/react';
 import { redirect } from '@shopify/remix-oxygen';
+import { useEffect } from 'react';
 
 export async function loader({ context }) {
   const query = `
@@ -57,13 +58,13 @@ export const action = async ({ request, context }) => {
   });
 
   const {customerAccessToken, customerUserErrors} = data?.customerAccessTokenCreate || {};
-  // console.log('Login data:', {email,password,customerAccessToken, customerUserErrors});
+  console.log('Login data:', {email,password,customerAccessToken, customerUserErrors});
 
   if (customerUserErrors?.length){
     return json({ error: "Invalid" }, { status: 400 });
   }
 
-  return redirect('/');
+  return json({ success: true, customerAccessToken }, { status: 200 });
 };
 
 
@@ -71,6 +72,12 @@ export default function Login() {
   const data = useLoaderData();
   const actionData = useActionData();
   const meta = data?.metaobject;
+
+  console.log("actionData: ", actionData);
+
+  useEffect(()=>{
+    localStorage.setItem('customerAccessToken', actionData?.customerAccessToken.accessToken);
+  },[actionData]); 
 
   const {
     title: { value: title } = {},

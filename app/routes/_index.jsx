@@ -96,7 +96,7 @@ export default function Homepage() {
       console.log("Token: ", token);
     }
     else{
-      navigate('/signup'); 
+      // navigate('/signup'); 
     }
   },[])
  
