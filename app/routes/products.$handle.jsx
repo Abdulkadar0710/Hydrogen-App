@@ -12,6 +12,8 @@ import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
+let flag = true;
+
 /**
  * @type {MetaFunction<typeof loader>}
  */
@@ -29,14 +31,74 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
+  const {context} = args;
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
+  
+  // const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6';
+  
+  //   if (!customerAccessToken) {
+  //     console.warn('No customer access token found. Returning empty wishlist.');
+  //     return json({ wishlist: [] });
+  //   }
+  
+  //   const query = `#graphql
+  //   query GetCustomerWishlist($customerAccessToken: String!) {
+  //     customer(customerAccessToken: $customerAccessToken) {
+  //       id
+  //       email
+  //       firstName
+  //       lastName
+  //       metafield(namespace: "custom", key: "wishl") {
+  //         value 
+  //       }
+  //     }
+  //   }
+  // `;
+   
+   
+  
+  //     const response = await context.storefront.query(query, {
+  //       variables: { customerAccessToken }, 
+  //     });
+  
+  //     const parsedWishlist = response?.customer?.metafield?.value
+  //       ? JSON.parse(response.customer.metafield.value)
+  //       : []; 
+  //     console.log("Parsed Wishlist:", ...parsedWishlist);
 
-  return {...deferredData, ...criticalData};
+  //     const deferredWishlist = {
+  //       wishlist: parsedWishlist,
+  //     };
+
+  return {...deferredData, ...criticalData}; 
 }
+
+const addToCart = async () => {
+  try {
+    const response = await fetch('/wish', { // Changed from './api/wish'
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'},
+    });
+    let data = await response.json();
+    data = JSON.parse(data.customer?.metafield?.value);
+
+    data.push({
+      productId: 'gid://shopify/Product/1234567890', // Example product ID
+      title: 'New Wishlist Item'
+    });
+    console.log('Fetched Wishlist:', data);
+
+    
+
+  } catch (error) {
+    console.error('Failed to fetch wishlist:', error); 
+  }
+};
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
@@ -66,7 +128,7 @@ async function loadCriticalData({context, params, request}) {
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
   return {
-    product,
+    product
   };
 }
 
@@ -83,11 +145,59 @@ function loadDeferredData({context, params}) {
   return {};
 }
 
+
+// async function addToCart({context, params}){
+
+
+
+//   if(flag){
+//     console.log("Added to cart");
+//     const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6';
+    
+//       if (!customerAccessToken) {
+//         console.warn('No customer access token found. Returning empty wishlist.');
+//         return json({ wishlist: [] });
+//       }
+    
+//       const query = `#graphql
+//       query GetCustomerWishlist($customerAccessToken: String!) {
+//         customer(customerAccessToken: $customerAccessToken) {
+//           id
+//           email
+//           firstName
+//           lastName
+//           metafield(namespace: "custom", key: "wishl") {
+//             value 
+//           }
+//         }
+//       }
+//     `; 
+    
+//         const response = await context.storefront.query(query, {
+//           variables: { customerAccessToken },
+//         });
+    
+//         const parsedWishlist = response?.customer?.metafield?.value
+//           ? JSON.parse(response.customer.metafield.value)
+//           : [];
+//         console.log("Parsed Wishlist:", parsedWishlist);
+//   } else {
+//     console.log("Please wait before adding another item to the cart");
+//   }
+
+//   flag = !flag;
+// }
+
+
+
+
 export default function Product() {
   /** @type {LoaderReturnData} */
   const {product} = useLoaderData();
 
-  // console.log("Product: ",product);
+  console.log("Product: ",product);
+  const data = useLoaderData();
+  console.log("Data: ",data);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -117,10 +227,13 @@ export default function Product() {
           compareAtPrice={selectedVariant?.compareAtPrice}
         />
         <br />
-        <ProductForm
+        {/* <ProductForm
           productOptions={productOptions}
           selectedVariant={selectedVariant}
-        />
+        /> */}
+        <div className="addToCart" 
+        onClick={addToCart}
+        >Add To Cart</div>
         <br />
         <br />
         <p>

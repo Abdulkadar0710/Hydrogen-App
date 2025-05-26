@@ -3,48 +3,41 @@ import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 
 
-// export async function loader({context}) {
-//   const customerAccessToken = await context.session.get('customerAccessToken');
+export async function loader({context}) {
+  const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; // Replace with actual logic to get customer access token
 
-//   if (!customerAccessToken) {
-//     return json({wishlist: []});
-//   }
+  if (!customerAccessToken) {
+    return json({wishlist: []});
+  }
 
-//   const wishlist = await fetchCustomerWishlist(context, customerAccessToken);
+  // const wishlist = await fetchCustomerWishlist(context, customerAccessToken);
+  
+  const query = `#graphql
+  query GetCustomerWishlist($customerAccessToken: String!) {
+    customer(customerAccessToken: $customerAccessToken) {
+      id
+      email
+      firstName
+      lastName
+      metafield(namespace: "custom", key: "wishl") {
+        value 
+      }
+    }
+  }
+`;
 
-//   return json({wishlist});
-// }
+    const response = await context.storefront.query(query, {
+      variables: { customerAccessToken },
+    });
 
-// export async function fetchCustomerWishlist(context, customerAccessToken) {
-//   const query = `#graphql
-//     query GetCustomerWishlist($customerAccessToken: String!) {
-//       customer(customerAccessToken: $customerAccessToken) {
-//         metafield(namespace: "custom", key: "wishl") {
-//           id
-//           value
-//         }
-//       }
-//     }
-//   `;
+    const parsedWishlist = response?.customer?.metafield?.value ? JSON.parse(response.customer.metafield.value) : [];
 
-//   const {data, errors} = await context.storefront.query(query, {
-//     variables: {customerAccessToken},
-//   });
+  return json({vaL: response});
 
-//   if (errors) {
-//     console.error('GraphQL errors:', errors);
-//     return [];
-//   }
+  
+} 
 
-//   const metafieldValue = data?.customer?.metafield?.value;
 
-//   try {
-//     return metafieldValue ? JSON.parse(metafieldValue) : [];
-//   } catch (err) {
-//     console.error('Error parsing wishlist metafield:', err);
-//     return [];
-//   }
-// }
 
 
 /**
@@ -56,8 +49,8 @@ import {useAside} from './Aside';
 export function ProductForm({productOptions, selectedVariant}) {
   const navigate = useNavigate();
   const {open} = useAside(); 
-  // const data = useLoaderData();
-  // console.log("Data: ", data);
+  const data = useLoaderData();
+  console.log("Dataaa: ", data); 
   return (
     <div className="product-form">
       {productOptions.map((option) => {
@@ -146,10 +139,11 @@ export function ProductForm({productOptions, selectedVariant}) {
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
           // open('cart');
+          // handleAddToCart();
         }}
         lines={
           selectedVariant
-            ? [
+            ? [ 
                 {
                   merchandiseId: selectedVariant.id,
                   quantity: 1,

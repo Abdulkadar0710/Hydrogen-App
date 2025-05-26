@@ -10,21 +10,27 @@ export async function loader({ context }) {
   }
 
   const query = `#graphql
-    query GetCustomerWishlist($customerAccessToken: String!) {
-      customer(customerAccessToken: $customerAccessToken) {
-        metafield(namespace: "custom", key: "wishl") {
-          value
-        }
+  query GetCustomerWishlist($customerAccessToken: String!) {
+    customer(customerAccessToken: $customerAccessToken) {
+      id
+      email
+      firstName
+      lastName
+      metafield(namespace: "custom", key: "wishl") {
+        value 
       }
     }
-  `;
- 
+  }
+`;
 
     const response = await context.storefront.query(query, {
       variables: { customerAccessToken },
     });
 
-
+    const parsedWishlist = response?.customer?.metafield?.value
+      ? JSON.parse(response.customer.metafield.value)
+      : [];
+    console.log("Parsed Wishlist:", parsedWishlist);
     return json(response);
 }
 
