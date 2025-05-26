@@ -1,6 +1,51 @@
-import {Link, useNavigate} from '@remix-run/react';
+import {Link, useLoaderData, useNavigate} from '@remix-run/react';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
+
+
+// export async function loader({context}) {
+//   const customerAccessToken = await context.session.get('customerAccessToken');
+
+//   if (!customerAccessToken) {
+//     return json({wishlist: []});
+//   }
+
+//   const wishlist = await fetchCustomerWishlist(context, customerAccessToken);
+
+//   return json({wishlist});
+// }
+
+// export async function fetchCustomerWishlist(context, customerAccessToken) {
+//   const query = `#graphql
+//     query GetCustomerWishlist($customerAccessToken: String!) {
+//       customer(customerAccessToken: $customerAccessToken) {
+//         metafield(namespace: "custom", key: "wishl") {
+//           id
+//           value
+//         }
+//       }
+//     }
+//   `;
+
+//   const {data, errors} = await context.storefront.query(query, {
+//     variables: {customerAccessToken},
+//   });
+
+//   if (errors) {
+//     console.error('GraphQL errors:', errors);
+//     return [];
+//   }
+
+//   const metafieldValue = data?.customer?.metafield?.value;
+
+//   try {
+//     return metafieldValue ? JSON.parse(metafieldValue) : [];
+//   } catch (err) {
+//     console.error('Error parsing wishlist metafield:', err);
+//     return [];
+//   }
+// }
+
 
 /**
  * @param {{
@@ -10,7 +55,9 @@ import {useAside} from './Aside';
  */
 export function ProductForm({productOptions, selectedVariant}) {
   const navigate = useNavigate();
-  const {open} = useAside();
+  const {open} = useAside(); 
+  // const data = useLoaderData();
+  // console.log("Data: ", data);
   return (
     <div className="product-form">
       {productOptions.map((option) => {
@@ -98,7 +145,7 @@ export function ProductForm({productOptions, selectedVariant}) {
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
-          open('cart');
+          // open('cart');
         }}
         lines={
           selectedVariant
@@ -114,13 +161,13 @@ export function ProductForm({productOptions, selectedVariant}) {
       >
         {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
       </AddToCartButton>
-    </div>
+    </div>  
   );
 }
 
 /**
  * @param {{
- *   swatch?: Maybe<ProductOptionValueSwatch> | undefined;
+ *   swatch?: Maybe<ProductOptionValueSwatch> | undefined; 
  *   name: string;
  * }}
  */

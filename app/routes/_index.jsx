@@ -96,10 +96,10 @@ export default function Homepage() {
       console.log("Token: ", token);
     }
     else{
-      navigate('/signup');
+      navigate('/signup'); 
     }
   },[])
-
+ 
   // console.log("Datas: ",data);
   return (
     <div className="home">

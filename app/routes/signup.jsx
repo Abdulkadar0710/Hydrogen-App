@@ -22,7 +22,7 @@ export async function loader({context}) {
                 altText
                 width
                 height
-              }
+              } 
             }
           }
         } 
@@ -30,36 +30,6 @@ export async function loader({context}) {
     }
   `;
 
-//   const CREATE_CUSTOMER_MUTATION = `#graphql
-//   mutation customerCreate($input: CustomerCreateInput!) {
-//     customerCreate(input: $input) {
-//       customer {
-//         id
-//         email
-//       }
-//       customerUserErrors {
-//         field
-//         message
-//       }
-//     }
-//   }
-// `;
-
-// const input = {
-//   firstName: "kadar",
-//     lastName: "khan",
-//     email: "abdulkadar0710@gmail.com",
-//     password: "abc@12345678"
-// };
-
-// const { data } = await context.storefront.mutate(CREATE_CUSTOMER_MUTATION, {
-//   variables: { input },
-// });
-
-// const errors = data?.customerCreate?.customerUserErrors;
-// if (errors?.length) {
-//   return json({ error: errors[0].message }, { status: 400 }); 
-// }
 
   const data = await context.storefront.query(query);
   return json(data);
@@ -96,6 +66,32 @@ export const action = async ({ request, context }) => {
   });
 
 
+  const LOGIN_MUTATION = `
+  mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
+    customerAccessTokenCreate(input: $input) {
+      customerAccessToken {
+        accessToken
+        expiresAt
+      }
+      customerUserErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const loginResponse = await context.storefront.mutate(LOGIN_MUTATION, {
+  variables: {
+    input: {
+      email: input.email,
+      password: input.password,
+    },
+  },
+});
+
+
+
   const { data } = val;   
 
   const errors = data?.customerCreate?.customerUserErrors;
@@ -113,19 +109,10 @@ export const action = async ({ request, context }) => {
  
   } 
 
-  // const customerId = data?.customerCreate?.customer?.id;
 
-  return json({id: val?.customerCreate?.customer?.id});
+  return json({id: val?.customerCreate?.customer?.id, customer: val?.customerCreate?.customer, accessToken: loginResponse?.customerAccessTokenCreate?.customerAccessToken?.accessToken});
 };
 
-// export const action = async ({ request }) => {
-//   const formData = await request.formData();
-//   const email = formData.get('email'); 
-//   const password = formData.get('password'); 
-
-
-//   return json({ success: true });
-// };
 
 export default function Signup() {
 
@@ -167,7 +154,7 @@ export default function Signup() {
               width,
               height
             } = {}
-          } = {}
+          } = {} 
         } = {}
       } = meta;
     
