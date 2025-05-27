@@ -91,7 +91,6 @@ const loginResponse = await context.storefront.mutate(LOGIN_MUTATION, {
 });
 
 
-
   const { data } = val;   
 
   const errors = data?.customerCreate?.customerUserErrors;
@@ -107,7 +106,9 @@ const loginResponse = await context.storefront.mutate(LOGIN_MUTATION, {
     formData.set('email', '');
     formData.set('password', '');
  
-  } 
+  }
+
+  console.log("Login Response: ", loginResponse);
 
 
   return json({id: val?.customerCreate?.customer?.id, customer: val?.customerCreate?.customer, accessToken: loginResponse?.customerAccessTokenCreate?.customerAccessToken?.accessToken});

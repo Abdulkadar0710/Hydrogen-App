@@ -1,85 +1,104 @@
 import { json } from '@shopify/remix-oxygen';
 
 export async function action({ context, request }) {
-  const body = await request.json();
-  const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; // Your existing token
+  // const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d'; // Replace this with dynamic logic
   
-  if (!customerAccessToken) {
-    return json({ error: 'Missing customer access token' }, { status: 401 });
-  }
+  // if (!customerAccessToken) {
+  //   return json({ error: 'Missing customer access token' }, { status: 401 });
+  // }
 
-  // First, get the customer ID from the access token using Storefront API
-  const CUSTOMER_QUERY = `
-    query GetCustomer($customerAccessToken: String!) {
-      customer(customerAccessToken: $customerAccessToken) {
-        id
-      }
-    }
-  `;
+  const body = await request.json(); 
+  console.log("Request Body: ", body);
 
-  const customerResponse = await context.storefront.query(CUSTOMER_QUERY, {
-    variables: { customerAccessToken }
-  });
-
-  const customerId = customerResponse?.customer?.id;
-
-  // console.log("Customer ID: ", customerId);
-  
-  if (!customerId) {
-    return json({ error: 'Invalid customer access token' }, { status: 401 });
-  }
-
-  // Extract just the numeric ID from the GID (it's already in the right format from Storefront API)
-  // Storefront API returns: "gid://shopify/Customer/1234567890"
-  // Admin API expects: "gid://shopify/Customer/1234567890" (same format)
-
-  const wishlistData = JSON.stringify(body); // Assuming request.body contains the wishlist data
+  const wishlistData = JSON.stringify(body?.wishlist || []);
+  const id = JSON.stringify(body?.customerId || null);
+  console.log("customerId: ", id);
   console.log("Wishlist Data: ", wishlistData);
 
-  // Admin API mutation for updating customer metafields
+
+   
+
+  // Using Storefront API (your original working approach)
   const MUTATION = `
-    mutation UpdateCustomerMetafield($customerId: ID!, $metafields: [MetafieldInput!]!) {
-      customerUpdate(
-        input: {
-          id: $customerId
-          metafields: $metafields
-        }
-      ) {
-        customer {
-          id
-          metafield(namespace: "custom", key: "wishl") {
-            value
-          }
-        }
-        userErrors {
-          field
-          message
-        }
+    mutation UpdateCustomerWishlist($input: CustomerInput!) {
+  customerUpdate(input: $input) {
+    customer {
+      id
+      metafield(namespace: "custom", key: "wishl") {
+        value
       }
     }
+    userErrors {
+      field
+      message
+    }
+  }
+}
   `;
 
   const variables = {
-    customerId: customerId, // Already in correct GID format from Storefront API
+    id,
     metafields: [
       {
         namespace: "custom",
         key: "wishl",
+        type: "json",
         value: wishlistData,
-        type: "json"
       }
     ]
   };
 
+  // {
+  //   "input": {
+  //     "id": "gid://shopify/Customer/8068214227172",
+  //     "metafields": [
+  //       {
+  //         "namespace": "custom",
+  //         "key": "wishl",
+  //         "type": "json",
+  //         "value": "[{\"id\":\"gid://shopify/Product/111\",\"title\":\"Cool Shirt\",\"vendor\":\"Nike\",\"description\":\"A cool shirt\",\"handle\":\"cool-shirt\"}]"
+  //       }
+  //     ]
+  //   }
+  // }
+
   try {
-    // Using Admin API instead of Storefront API
-    const response = await context.admin.graphql(MUTATION, {
-      variables,
+    // Using fetch to call Storefront API directly
+
+    const domain = context.env.PUBLIC_STORE_DOMAIN;
+    const storefrontAccessToken = context.env.PRIVATE_STOREFRONT_API_TOKEN; 
+
+    console.log('Storefront API URL:', domain);
+    console.log("Storefront Access Token:", storefrontAccessToken);
+
+    const storefrontUrl = `https://${domain}/admin/api/2024-04/graphql.json`;
+    // const storefrontAccessToken = context.env.PUBLIC_STOREFRONT_API_TOKEN;
+
+    if (!storefrontAccessToken) {
+      console.error('Storefront API access token not available');
+      return json({ error: 'Storefront API not configured' }, { status: 500 });
+    }
+
+    const response = await fetch(storefrontUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',  
+        'X-Shopify-Storefront-Access-Token': storefrontAccessToken, 
+      },
+      body: JSON.stringify({
+        query: MUTATION,
+        variables,
+      }),
     });
+
+    console.log('Response status:', response);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response}`);
+    }
 
     const result = await response.json();
 
-    if (result.data?.customerUpdate?.userErrors?.length > 0) {
+    if (result?.data?.customerUpdate?.userErrors?.length > 0) {
       return json(
         { 
           error: 'Failed to update wishlist', 
@@ -91,14 +110,14 @@ export async function action({ context, request }) {
 
     return json({
       success: true,
-      updatedMetafield: result.data?.customerUpdate?.customer?.metafield,
+      updatedMetafield: result?.data?.customerUpdate?.customer?.metafield,
     });
 
   } catch (error) {
     console.error('Error updating customer metafield:', error);
     return json(
-      { error: 'Internal server error' }, 
+      { error: 'Internal server error', details: error.message }, 
       { status: 500 }
     );
   }
-}
+} 

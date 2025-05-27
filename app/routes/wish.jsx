@@ -3,7 +3,7 @@ import { json } from '@shopify/remix-oxygen';
 export async function loader({ context, request }) {
   const url = new URL(request.url);
   // TODO: Replace with dynamic customer access token retrieval
-  const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; 
+  const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d'; 
 
   if (!customerAccessToken) {
     return json({ error: 'Missing customer access token' }, { status: 401 }); // 401 for unauthorized

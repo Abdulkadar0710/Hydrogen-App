@@ -40,10 +40,25 @@ export async function loader(args) {
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);   
+  const criticalData = await loadCriticalData(args); 
+  
+  const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d';
 
+  const query = `
+    query GetCustomerId($customerAccessToken: String!) {
+      customer(customerAccessToken: $customerAccessToken) {
+        id  
+      }
+    }
+  `;
 
-  return {...deferredData, ...criticalData}; 
+  const variables = {
+    customerAccessToken,
+  };
+ 
+  const response = await context.storefront.query(query, {variables});     
+
+  return {...deferredData, ...criticalData, customerId: response?.customer?.id || null}; 
 }
 
 
@@ -90,7 +105,7 @@ function loadDeferredData({context, params}) {
   // For example: product reviews, product recommendations, social feeds.
 
   return {};
-}
+} 
 
 
 export default function Product() {
@@ -102,6 +117,8 @@ export default function Product() {
   const {product} = useLoaderData();
   const [currentProduct, setCurrentProduct] = useState(product);
 
+  const {customerId} = useLoaderData();
+
   const productToSave = {
     id: currentProduct.id,
     title: currentProduct.title,
@@ -112,8 +129,8 @@ export default function Product() {
 
   // console.log("Product to save: ",productToSave);
   // console.log("Product: ",product);
-  const data = useLoaderData();
-  // console.log("Data: ",data);11
+  // const data = useLoaderData();
+  // console.log("Data: ",data);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -154,11 +171,11 @@ export default function Product() {
       const updatedResponse = await fetch('/addToWishList', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json', 
         },
-        body: JSON.stringify({wishlist: data}),
+        body: JSON.stringify({wishlist: data, customerId: customerId}),
       });
-      const updatedData = await updatedResponse.json(); 
+      const updatedData = await updatedResponse.json();
       console.log('updated Wishlist:', updatedData);
     }
       else{
