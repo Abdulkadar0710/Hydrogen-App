@@ -1,51 +1,48 @@
 import { json } from '@shopify/remix-oxygen';
 
 export async function action({ context, request }) {
-  // const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d'; // Replace this with dynamic logic
-  
-  // if (!customerAccessToken) {
-  //   return json({ error: 'Missing customer access token' }, { status: 401 });
-  // }
 
   const body = await request.json(); 
   console.log("Request Body: ", body);
 
   const wishlistData = JSON.stringify(body?.wishlist || []);
-  const id = JSON.stringify(body?.customerId || null);
+  const id = body?.customerId || null;
   console.log("customerId: ", id);
   console.log("Wishlist Data: ", wishlistData);
 
 
    
 
-  // Using Storefront API (your original working approach)
+  // Using Storefront API (your original working approach) 
   const MUTATION = `
-    mutation UpdateCustomerWishlist($input: CustomerInput!) {
-  customerUpdate(input: $input) {
-    customer {
-      id
-      metafield(namespace: "custom", key: "wishl") {
-        value
+     mutation UpdateCustomerWishlist($input: CustomerInput!) {
+      customerUpdate(input: $input) {
+        customer {
+          id
+          metafield(namespace: "custom", key: "wishl") {
+            value
+          }
+        }
+        userErrors {
+          field
+          message
+        } 
       }
     }
-    userErrors {
-      field
-      message
-    }
-  }
-}
   `;
 
   const variables = {
-    id,
-    metafields: [
-      {
-        namespace: "custom",
-        key: "wishl",
-        type: "json",
-        value: wishlistData,
-      }
-    ]
+    input: {
+      id: id,
+      metafields: [
+        {
+          namespace: "custom",
+          key: "wishl",
+          type: "json",
+          value: wishlistData,
+        }
+      ]
+    }
   };
 
   // {
@@ -83,7 +80,7 @@ export async function action({ context, request }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',  
-        'X-Shopify-Storefront-Access-Token': storefrontAccessToken, 
+        'X-Shopify-Access-Token': storefrontAccessToken, 
       },
       body: JSON.stringify({
         query: MUTATION,
@@ -97,6 +94,7 @@ export async function action({ context, request }) {
     }
 
     const result = await response.json();
+    console.log('GraphQL response:', result);
 
     if (result?.data?.customerUpdate?.userErrors?.length > 0) {
       return json(
@@ -110,7 +108,7 @@ export async function action({ context, request }) {
 
     return json({
       success: true,
-      updatedMetafield: result?.data?.customerUpdate?.customer?.metafield,
+      updatedMetafield: result,
     });
 
   } catch (error) {

@@ -36,6 +36,7 @@ export const meta = ({data}) => {
  */
 export async function loader(args) {
   const {context} = args;
+  const {params, request} = args;
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
@@ -43,6 +44,12 @@ export async function loader(args) {
   const criticalData = await loadCriticalData(args); 
   
   const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d';
+
+  const cookieHeader = request.headers.get('Cookie') || '';
+  const cookies = Object.fromEntries(cookieHeader.split('; ').map(c => c.split('=')));
+  const token = cookies.token;
+
+  console.log("Token from cookie:", token);
 
   const query = `
     query GetCustomerId($customerAccessToken: String!) {
@@ -155,11 +162,12 @@ export default function Product() {
 
   const addToCart = async () => {
 
-    const response = await fetch('/wish', { // Changed from './api/wish'
+    const response = await fetch('/wish', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'},
-    });
+     });
+
     let data = await response.json();
     data = JSON.parse(data.customer?.metafield?.value) || [];
 
@@ -182,8 +190,17 @@ export default function Product() {
         // console.log("Please wait before adding another item to the cart");
         data = data.filter(item => item.productId !== productToSave.id);
         console.log('Updated Wishlist:', data);
+        const updatedResponse = await fetch('/addToWishList', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', 
+          },
+          body: JSON.stringify({wishlist: data, customerId: customerId}),
+        });
+        const updatedData = await updatedResponse.json();
+        console.log('updated Wishlist:', updatedData);
       }
-      // flag = !flag;
+      // flag = !flag; 
       setFlag(!flag); 
   
   };
@@ -204,7 +221,7 @@ export default function Product() {
           productOptions={productOptions}
           selectedVariant={selectedVariant}
         /> */}
-        <div className="addToCart" 
+        <div className="addToCart"
         onClick={addToCart}
         >Add To Cart { flag==true ? <CiHeart /> : <FaHeart />}</div>
         <br />

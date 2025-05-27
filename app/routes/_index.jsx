@@ -99,6 +99,13 @@ export default function Homepage() {
       // navigate('/signup'); 
     }
   },[])
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      document.cookie = `token=${token}; path=/`; // make token cookie available to all routes
+    }
+  }, []);
  
   // console.log("Datas: ",data);
   return (
@@ -280,6 +287,7 @@ const ALL_COLLECTIONS_QUERY = `#graphql
 
 function Banner() {
   // console.log("Banner component loaded sucessfully ");
+
   return (
     <section className="banner">
      <div className="banner-info">
