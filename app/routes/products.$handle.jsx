@@ -197,9 +197,9 @@ export default function Product() {
     data = JSON.parse(data.customer?.metafield?.value) || [];
 
     console.log("flag: ",flag); 
-     if(flag){ 
+     if(flag){
        data.push(productToSave);
-       console.log("Adding to wishlist", data);
+      //  console.log("Adding to wishlist", data);
 
       const updatedResponse = await fetch('/addToWishList', {
         method: 'POST',
@@ -209,12 +209,13 @@ export default function Product() {
         body: JSON.stringify({wishlist: data, customerId: customerId}),
       });
       const updatedData = await updatedResponse.json();
-      console.log('updated Wishlist:', updatedData);
+      console.log('updated Wishlist added one:', updatedData);
     }
       else{
-        // console.log("Please wait before adding another item to the cart");
-        data = data.filter(item => item.productId !== productToSave.id);
-        console.log('Updated Wishlist:', data);
+        // console.log('Before Updated Wishlist:', data);
+        // console.log("productToSave: ",productToSave);
+        data = data.filter((item) => item.id !== productToSave.id);
+        // console.log('Updated Wishlist:', data);
         const updatedResponse = await fetch('/addToWishList', {
           method: 'POST',
           headers: {
@@ -223,11 +224,9 @@ export default function Product() {
           body: JSON.stringify({wishlist: data, customerId: customerId}),
         });
         const updatedData = await updatedResponse.json();
-        console.log('updated Wishlist:', updatedData);
+        // console.log('updated Wishlist cutdown:', updatedData);
       }
-      // flag = !flag; 
       setFlag(!flag); 
-  
   };
   
 
