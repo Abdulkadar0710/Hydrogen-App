@@ -159,7 +159,7 @@ export default function Product() {
         body: JSON.stringify({wishlist: data}),
       });
       const updatedData = await updatedResponse.json(); 
-      console.log('Fetched Wishlist:', updatedData);
+      console.log('updated Wishlist:', updatedData);
     }
       else{
         // console.log("Please wait before adding another item to the cart");
