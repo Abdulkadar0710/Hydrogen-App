@@ -117,6 +117,7 @@ export default function Product() {
   /** @type {LoaderReturnData} */
   const {product} = useLoaderData();
   const [currentProduct, setCurrentProduct] = useState(product);
+  console.log("Current Product: ",currentProduct);
 
   const {customerId} = useLoaderData();
 
@@ -126,12 +127,13 @@ export default function Product() {
     vendor: currentProduct.vendor, 
     description: currentProduct.description,
     handle: currentProduct.handle,
+    image: currentProduct.selectedOrFirstAvailableVariant.image.url
   };
 
   // console.log("Product to save: ",productToSave);
   // console.log("Product: ",product);
   const data = useLoaderData();
-  console.log("Data: ",data);
+  // console.log("Data: ",data);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -164,14 +166,14 @@ export default function Product() {
         });
   
         let data = await response.json();
-        data = JSON.parse(data.customer?.metafield?.value) || [];
+        data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
   
         const foundItem = data.find((item) => item.id === product.id);
         setFlag(foundItem ? false : true);
       } catch (error) {
         console.error("Error fetching wishlist:", error);
       }
-    };
+    }; 
   
     fetchWishList();
   
@@ -179,7 +181,7 @@ export default function Product() {
     return () => {
       // any necessary cleanup (nothing in your case)
     };
-  }, [product.id]);
+  }, []);
   
 
 
@@ -194,9 +196,9 @@ export default function Product() {
      });
 
     let data = await response.json();
-    data = JSON.parse(data.customer?.metafield?.value) || [];
+    data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
 
-    console.log("flag: ",flag); 
+    // console.log("flag: ",flag); 
      if(flag){
        data.push(productToSave);
       //  console.log("Adding to wishlist", data);
@@ -226,7 +228,7 @@ export default function Product() {
         const updatedData = await updatedResponse.json();
         // console.log('updated Wishlist cutdown:', updatedData);
       }
-      setFlag(!flag); 
+      setFlag(!flag);
   };
   
 
