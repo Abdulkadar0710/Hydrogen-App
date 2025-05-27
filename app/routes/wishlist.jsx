@@ -73,6 +73,8 @@ import { useEffect, useState } from 'react';
 export async function loader({ context, request }) {
 
     const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d';
+
+    
   const query = `
     query GetCustomerId($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
@@ -87,7 +89,7 @@ export async function loader({ context, request }) {
  
   const response = await context.storefront.query(query, {variables});
 
-  return json({customerId: response?.customer?.id || null});
+  return json({customerId: response?.customer?.id});
 
 }
 
@@ -95,15 +97,22 @@ export async function loader({ context, request }) {
 
 export default function WishList() {
 
-  const customerId  = useLoaderData();
-  console.log("Customer ID: ", customerId);
+  const {customerId}  = useLoaderData();
+  
+  useEffect(() =>  { 
+    setTimeout(() => {
+      
+      console.log("Customer ID: ", customerId);
+    }, 3000);
+  },[customerId])
+
 
   const [wishlist, setWishlist] = useState([]);
   const [flag, setFlag] = useState(true);
  
-  const loadWishList = async () => {
+  const loadWishList = async () => {         
     const response = await fetch('/wish', {
-      method: 'GET',
+      method: 'GET', 
       headers: {
         'Content-Type': 'application/json'},
      });
@@ -139,6 +148,7 @@ export default function WishList() {
     console.log("Wishlist before removal:", wishlist);
    
     const updatedWishlist = wishlist.filter(item => item.id !== id);
+    console.log("Wishlist After removal:", updatedWishlist);
 
         const updatedResponse = await fetch('/addToWishList', { 
           method: 'POST', 
@@ -148,6 +158,9 @@ export default function WishList() {
           body: JSON.stringify({wishlist: updatedWishlist, customerId: customerId}),
         });
         const updatedData = await updatedResponse.json();
+
+        console.log("updatedData:", updatedData); 
+
 
     setWishlist(updatedWishlist);
 
