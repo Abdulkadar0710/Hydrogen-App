@@ -99,13 +99,6 @@ export default function Homepage() {
       // navigate('/signup'); 
     }
   },[])
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      document.cookie = `token=${token}; path=/`; // make token cookie available to all routes
-    }
-  }, []);
  
   // console.log("Datas: ",data);
   return (

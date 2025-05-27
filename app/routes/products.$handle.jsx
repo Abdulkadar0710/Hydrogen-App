@@ -14,7 +14,8 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 
 
 
@@ -36,7 +37,6 @@ export const meta = ({data}) => {
  */
 export async function loader(args) {
   const {context} = args;
-  const {params, request} = args;
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
@@ -44,12 +44,6 @@ export async function loader(args) {
   const criticalData = await loadCriticalData(args); 
   
   const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d';
-
-  const cookieHeader = request.headers.get('Cookie') || '';
-  const cookies = Object.fromEntries(cookieHeader.split('; ').map(c => c.split('=')));
-  const token = cookies.token;
-
-  console.log("Token from cookie:", token);
 
   const query = `
     query GetCustomerId($customerAccessToken: String!) {
@@ -112,7 +106,7 @@ function loadDeferredData({context, params}) {
   // For example: product reviews, product recommendations, social feeds.
 
   return {};
-} 
+}
 
 
 export default function Product() {
@@ -127,7 +121,7 @@ export default function Product() {
   const {customerId} = useLoaderData();
 
   const productToSave = {
-    id: currentProduct.id,
+    id: currentProduct.id,   
     title: currentProduct.title,
     vendor: currentProduct.vendor, 
     description: currentProduct.description,
@@ -136,8 +130,8 @@ export default function Product() {
 
   // console.log("Product to save: ",productToSave);
   // console.log("Product: ",product);
-  // const data = useLoaderData();
-  // console.log("Data: ",data);
+  const data = useLoaderData();
+  console.log("Data: ",data);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -156,6 +150,37 @@ export default function Product() {
   });
 
   const {title, descriptionHtml} = product;
+
+
+
+  useEffect(() => {
+    const fetchWishList = async () => {
+      try {
+        const response = await fetch('/wish', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        let data = await response.json();
+        data = JSON.parse(data.customer?.metafield?.value) || [];
+  
+        const foundItem = data.find((item) => item.id === product.id);
+        setFlag(foundItem ? false : true);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      }
+    };
+  
+    fetchWishList();
+  
+    // If you had a cleanup, return it here:
+    return () => {
+      // any necessary cleanup (nothing in your case)
+    };
+  }, [product.id]);
+  
 
 
 

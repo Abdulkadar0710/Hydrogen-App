@@ -79,7 +79,7 @@ export default function Login() {
     localStorage.setItem('customerAccessToken', actionData?.customerAccessToken.accessToken);
   },[actionData]); 
 
-  const {
+  const { 
     title: { value: title } = {},
     desc: { value: desc } = {},
     welcomeImage: {

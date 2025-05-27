@@ -35,6 +35,8 @@ import { useEffect, useState } from 'react';
 //     return json(response);
 // }
 
+
+
 export default function WishList() {
   // const  wishlist  = useLoaderData();
 
