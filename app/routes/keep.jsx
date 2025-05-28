@@ -1,9 +1,7 @@
 import {useLoaderData, useFetcher, useNavigate} from '@remix-run/react';
 import {json, redirect} from '@shopify/remix-oxygen';
 import React from 'react';
- 
-const SHOPIFY_DOMAIN = 'prarthna-gwl.myshopify.com'; // Replace with your shop domain
-const SHOPIFY_ACCESS_TOKEN = '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'; // Replace with your access token
+
  
 export async function loader({context}) {
   const cart = await context.cart.get(); 
