@@ -63,100 +63,84 @@ export async function action({context, request}) {
          }
        `;
        const variables = { ids: productIds };
-    //    const storefrontRes = await context.storefront.query(query, { variables });
+       const storefrontRes = await context.storefront.query(query, { variables });
+
+       const lineItems = storefrontRes.nodes
+       .filter(node => node?.variants?.nodes?.[0]?.id)
+       .map(node => ({
+         variant_id: node.variants.nodes[0].id.split('/').pop(),
+         quantity: 1
+       }));
 
 
-    let results = [];
-    for (const id of productIds) {
-        const query = `
-          query GetProductWithInventory($id: ID!) {
-            product(id: $id) {
-              id
-              title
-              vendor
-              description
-              handle
-              variants(first: 10) {
-                edges {
-                  node {
-                    id
-                    title
-                    sku
-                    inventoryQuantity
-                    inventoryItem {
-                      id
-                      inventoryLevels(first: 10) {
-                        edges {
-                          node {
-                            available
-                            location {
-                              id
-                              name
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        `;
-  
-        const variables = id;
-  
-        const res = await fetch(`https://${context.env.PUBLIC_STORE_DOMAIN}/admin/api/2024-04/graphql.json`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',  
-            'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN, 
-          }, 
-          body: JSON.stringify({ query, variables }),
-        });
-  
-        const jsonRes = await res.json();
-  
-        if (jsonRes.errors) {
-          console.error(`Error fetching product ${id}:`, jsonRes.errors);
-          continue;
-        }
-  
-        results.push(jsonRes);
+
+    // Step 3: Build draft order input
+    const draftOrderInput = {
+      draft_order: {
+        line_items: lineItems,
+        customer: {
+          first_name: firstName,
+          last_name: lastName,
+          email,
+        },
+        email,
+        shipping_address: {
+          address1,
+          city,
+          province,
+          country,
+          zip,
+        },
+        note,
+        use_customer_default_address: false,
+        tags: 'Created via Hydrogen custom checkout',
+        shipping_line: {
+          title: 'Standard Shipping',
+          price: '0.00',
+          code: 'Free Shipping',
+        },
+        send_invoice: true,
+      },
+    };
+
+     // Step 4: Create draft order
+     const createRes = await fetch(
+      `https://${context.env.PUBLIC_STORE_DOMAIN}/admin/api/2023-04/draft_orders.json`,
+      {
+        method: 'POST', 
+        headers: {
+          'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(draftOrderInput),
       }
+    );
 
+    if (!createRes.ok) {
+      const errText = await createRes.text();
+      return json({ error: `Failed to create draft order: ${errText}` }, { status: 500 });
+    }
 
+    const {draft_order}  = await createRes.json();
 
+     // Step 5: Complete the draft order (optional)
+     const completeRes = await fetch(
+      `https://${context.env.PUBLIC_STORE_DOMAIN}/admin/api/2023-04/draft_orders/${draft_order.id}/complete.json`,
+      {
+        method: 'PUT',
+        headers: {
+          'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }
+    );
 
-   
-    //    const lineItems = storefrontRes.nodes
-    //      .filter(node => node?.variants?.nodes?.[0]?.id)
-    //      .map(node => ({
-    //        variant_id: node.variants.nodes[0].id.split('/').pop(),
-    //        quantity: 1
-    //      }));
-
-        // Step 4: Create draft order
-        // const createRes = await fetch(
-        //     `https://${process.env.PUBLIC_STORE_DOMAIN}/admin/api/2023-04/draft_orders.json`,
-        //     {
-        //       method: 'POST',
-        //       headers: {
-        //         'X-Shopify-Access-Token': process.env.PRIVATE_STOREFRONT_API_TOKEN,
-        //         'Content-Type': 'application/json',
-        //         Accept: 'application/json',
-        //       },
-        //       body: JSON.stringify(draftOrderInput),
-        //     }
-        //   );
-      
-        //   if (!createRes.ok) {
-        //     const errText = await createRes.text();
-        //     return json({ error: `Failed to create draft order: ${errText}` }, { status: 500 });
-        //   }
-      
-        //   const { draft_order } = await createRes.json(); 
-
+    if (!completeRes.ok) {
+      const errText = await completeRes.text();
+      return json({ error: `Failed to complete order: ${errText}` }, { status: 500 });
+    }
 
     return json({
         firstName,
@@ -170,93 +154,12 @@ export async function action({context, request}) {
         note,
         wishData,
         productIds,
-        // storefrontRes,
-        results
-    });
+        storefrontRes,
+        lineItems,
+        draft_order
+        // results
+    }); 
     
- 
-    // if (
-    //   !firstName || !lastName || !email || !address1 ||
-    //   !city || !province || !country || !zip || !cartLinesJSON
-    // ) {
-    //   return json({error: 'Please fill all required fields'}, {status: 400});
-    // }
- 
-    // const cartLines = JSON.parse(cartLinesJSON);
-    // const lineItems = cartLines.map((line) => ({
-    //   variant_id: line.variantId.split('/').pop(),
-    //   quantity: Number(line.quantity) >= 1 ? Number(line.quantity) : 1, // Ensure qty ≥ 1
-    // }));
- 
-    // const draftOrderInput = {
-    //   draft_order: {
-    //     line_items: lineItems,
-    //     customer: {
-    //       first_name: firstName,
-    //       last_name: lastName,
-    //       email,            // customer email here
-    //     },
-    //     email,              // top-level email required for order to have email
-    //     shipping_address: {
-    //       address1,
-    //       city,
-    //       province,
-    //       country,
-    //       zip,
-    //     },
-    //     note,
-    //     use_customer_default_address: false,
-    //     tags: 'Created via Hydrogen custom checkout',
-    //     shipping_line: {
-    //       title: 'Standard Shipping',
-    //       price: '0.00',
-    //       code: 'Free Shipping',
-    //     },
-    //     send_invoice: true,  // send email invoice automatically
-    //   },
-    // };
- 
-    // // Create draft order
-    // const createRes = await fetch(
-    //   `https://${SHOPIFY_DOMAIN}/admin/api/2023-04/draft_orders.json`,
-    //   {
-    //     method: 'POST',
-    //     headers: {
-    //       'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
-    //       'Content-Type': 'application/json',
-    //       Accept: 'application/json',
-    //     },
-    //     body: JSON.stringify(draftOrderInput),
-    //   }
-    // );
- 
-    // if (!createRes.ok) {
-    //   const errText = await createRes.text();
-    //   return json({error: `Failed to create draft order: ${errText}`}, {status: 500});
-    // }
- 
-    // const {draft_order} = await createRes.json();
- 
-    // // Complete draft order to convert to actual order & charge
-    // const completeRes = await fetch(
-    //   `https://${SHOPIFY_DOMAIN}/admin/api/2023-04/draft_orders/${draft_order.id}/complete.json`,
-    //   {
-    //     method: 'PUT',
-    //     headers: {
-    //       'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
-    //       'Content-Type': 'application/json',
-    //       Accept: 'application/json',
-    //     },
-    //   }
-    // );
- 
-    // if (!completeRes.ok) {
-    //   const errText = await completeRes.text();
-    //   return json({error: `Failed to complete order: ${errText}`}, {status: 500});
-    // }
- 
-    // // Success — redirect to homepage or wherever you want
-    // return redirect('/');
   } catch (error) {
     console.error('Checkout action error:', error);
     return json({error: 'Internal server error'}, {status: 500});
