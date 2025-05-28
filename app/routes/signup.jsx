@@ -14,7 +14,7 @@ export async function loader({context}) {
           desc: field(key: "welcomedesc") {
           value
         }
-          welcomeImage: field(key: "welcomeimage") {
+          welcomeImage: field(key: "welcomeimage") { 
           reference {
             ... on MediaImage { 
               image { 

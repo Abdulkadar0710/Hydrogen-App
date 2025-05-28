@@ -26,6 +26,7 @@ export async function loader({ context, request }) {
   const parsedWishlist = response?.customer?.metafield?.value
     ? JSON.parse(response.customer.metafield.value)
     : [];
-  console.log("Parsed Wishlist:", parsedWishlist);
+  // console.log("Parsed Wishlist:", parsedWishlist);
   return json(response);
 }
+ 

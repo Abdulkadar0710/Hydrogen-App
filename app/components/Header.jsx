@@ -8,7 +8,6 @@ import {useAside} from '~/components/Aside';
  */
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
-  console.log('Header props:', {header, isLoggedIn, cart, publicStoreDomain});
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
@@ -199,6 +198,15 @@ const FALLBACK_HEADER_MENU = {
       url: '/wishlist',
       items: [],
     },
+    {
+      id: 'gid://shopify/MenuItem/4616095334911111',
+      resourceId: null,
+      tags: [],
+      title: 'checkout',
+      type: 'HTTP',
+      url: '/checkout',
+      items: [],
+    }
     // {
     //   id: 'gid://shopify/MenuItem/461609566264',
     //   resourceId: null,

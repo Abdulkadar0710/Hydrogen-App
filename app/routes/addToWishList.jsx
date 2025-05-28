@@ -81,7 +81,7 @@ export async function action({ context, request }) {
       headers: {
         'Content-Type': 'application/json',  
         'X-Shopify-Access-Token': storefrontAccessToken, 
-      },
+      }, 
       body: JSON.stringify({
         query: MUTATION,
         variables,
