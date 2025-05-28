@@ -45,7 +45,7 @@ export async function loader({ context, request }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',  
-          'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN, 
+          'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN,
         }, 
         body: JSON.stringify({ query, variables }),
       });
