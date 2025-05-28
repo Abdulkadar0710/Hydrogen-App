@@ -1,3 +1,4 @@
+
 import {useLoaderData} from '@remix-run/react';
 import {
   getSelectedProductOptions,
@@ -36,13 +37,12 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  const {context, request} = args;
+  const {context} = args;
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
-  
+  const criticalData = await loadCriticalData(args); 
   
   const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d';
 
@@ -58,17 +58,9 @@ export async function loader(args) {
     customerAccessToken,
   };
  
-  const response = await context.storefront.query(query, {variables});
+  const response = await context.storefront.query(query, {variables});     
 
-
-  const url = new URL(request.url);
-  const token = url.searchParams.get("token");
-
-  //  console.log("Token: ",token);
-  const params = new URLSearchParams(request.url);
-  const customerAccess = params.get('customerAccessToken') || token;
-
-  return {...deferredData, ...criticalData, customerId: response?.customer?.id || null, token: token || null,params: customerAccess}; 
+  return {...deferredData, ...criticalData, customerId: response?.customer?.id || null}; 
 }
 
 
@@ -119,7 +111,8 @@ function loadDeferredData({context, params}) {
 
 
 export default function Product() {
-   
+  
+
   const [flag, setFlag] = useState(true);
 
   /** @type {LoaderReturnData} */
@@ -132,7 +125,7 @@ export default function Product() {
   const productToSave = {
     id: currentProduct.id,   
     title: currentProduct.title,
-    vendor: currentProduct.vendor,  
+    vendor: currentProduct.vendor, 
     description: currentProduct.description,
     handle: currentProduct.handle,
     image: currentProduct.selectedOrFirstAvailableVariant.image.url
@@ -140,8 +133,8 @@ export default function Product() {
 
   // console.log("Product to save: ",productToSave);
   // console.log("Product: ",product);
-  const data = useLoaderData(); 
-  console.log("Data: ",data);
+  const data = useLoaderData();
+  // console.log("Data: ",data);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(

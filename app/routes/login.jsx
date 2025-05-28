@@ -64,7 +64,10 @@ export const action = async ({ request, context }) => {
     return json({ error: "Invalid" }, { status: 400 });
   }
 
-  return json({ success: true, customerAccessToken }, { status: 200 });
+  const params = new URLSearchParams();
+  params.append('customerAccessToken', customerAccessToken.accessToken);
+
+  return json({ success: true, customerAccessToken : customerAccessToken, params: params.get('customerAccessToken')});
 };
 
 

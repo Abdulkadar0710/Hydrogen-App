@@ -1,6 +1,6 @@
 import { json } from '@shopify/remix-oxygen';
 
-export async function loader({ context, request }) {
+export async function loader({ context, request }) {  
   const url = new URL(request.url);
   // TODO: Replace with dynamic customer access token retrieval
   const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d'; 
@@ -13,7 +13,7 @@ export async function loader({ context, request }) {
     query GetCustomerWishlist($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
         metafield(namespace: "custom", key: "wishl") {
-          value
+          value 
         }
       }
     }

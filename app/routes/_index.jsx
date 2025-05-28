@@ -91,12 +91,12 @@ export default function Homepage() {
   const navigate = useNavigate();
 
   useEffect(()=>{
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('customerAccessToken');
     if(token){
       console.log("Token: ", token);
     }
     else{
-      // navigate('/signup'); 
+      navigate('/signup'); 
     }
   },[])
  

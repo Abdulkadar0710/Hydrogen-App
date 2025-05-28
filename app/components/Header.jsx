@@ -8,13 +8,14 @@ import {useAside} from '~/components/Aside';
  */
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
+  console.log('Header props:', {header, isLoggedIn, cart, publicStoreDomain});
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
         <strong>{shop.name}</strong>
       </NavLink>
       <HeaderMenu
-        menu={menu}
+        menu={menu} 
         viewport="desktop"
         primaryDomainUrl={header.shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
@@ -54,7 +55,7 @@ export function HeaderMenu({
           Home
         </NavLink>
       )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
+      {(FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
         // if the url is internal, we strip the domain
@@ -175,38 +176,47 @@ const FALLBACK_HEADER_MENU = {
       id: 'gid://shopify/MenuItem/461609500728',
       resourceId: null,
       tags: [],
+      title: 'Home',
+      type: 'HTTP',
+      url: '/',
+      items: [],
+    },
+    {
+      id: 'gid://shopify/MenuItem/46160950072811111',
+      resourceId: null,
+      tags: [],
       title: 'Collections',
       type: 'HTTP',
       url: '/collections',
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461609533496',
+      id: 'gid://shopify/MenuItem/46160953349611111',
       resourceId: null,
       tags: [],
-      title: 'Blog',
+      title: 'wishList',
       type: 'HTTP',
-      url: '/blogs/journal',
+      url: '/wishlist',
       items: [],
     },
-    {
-      id: 'gid://shopify/MenuItem/461609566264',
-      resourceId: null,
-      tags: [],
-      title: 'Policies',
-      type: 'HTTP',
-      url: '/policies',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609599032',
-      resourceId: 'gid://shopify/Page/92591030328',
-      tags: [],
-      title: 'About',
-      type: 'PAGE',
-      url: '/pages/about',
-      items: [],
-    },
+    // {
+    //   id: 'gid://shopify/MenuItem/461609566264',
+    //   resourceId: null,
+    //   tags: [],
+    //   title: 'Policies',
+    //   type: 'HTTP',
+    //   url: '/policies',
+    //   items: [],
+    // },
+    // {
+    //   id: 'gid://shopify/MenuItem/461609599032',
+    //   resourceId: 'gid://shopify/Page/92591030328',
+    //   tags: [],
+    //   title: 'About',
+    //   type: 'PAGE',
+    //   url: '/pages/about',
+    //   items: [],
+    // },
   ],
 };
 

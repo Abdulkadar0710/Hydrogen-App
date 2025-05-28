@@ -1,10 +1,10 @@
 import { Form, json, Link, useActionData, useLoaderData } from '@remix-run/react';
 import {redirect} from '@shopify/remix-oxygen';
 import {useNavigate} from '@remix-run/react';
-import { useEffect } from 'react';
+import { useEffect } from 'react'; 
 
 
-export async function loader({context}) {
+export async function loader({context}) { 
   const query = `
     query GetWelcomePage {
       metaobject(handle: {type: "welcomepage", handle: "i-am-title"}) {
@@ -90,6 +90,9 @@ const loginResponse = await context.storefront.mutate(LOGIN_MUTATION, {
   },
 });
 
+console.log("Login Response: ", loginResponse);
+
+
 
   const { data } = val;   
 
@@ -106,10 +109,11 @@ const loginResponse = await context.storefront.mutate(LOGIN_MUTATION, {
     formData.set('email', '');
     formData.set('password', '');
  
-  }
+  } 
 
-  console.log("Login Response: ", loginResponse);
-
+  const customerAccessToken = loginResponse?.customerAccessTokenCreate?.customerAccessToken?.accessToken;
+  const params = new URLSearchParams();
+  params.append('Authorization', `Bearer ${customerAccessToken}`);
 
   return json({id: val?.customerCreate?.customer?.id, customer: val?.customerCreate?.customer, accessToken: loginResponse?.customerAccessTokenCreate?.customerAccessToken?.accessToken});
 };
@@ -119,7 +123,7 @@ export default function Signup() {
 
       const data = useLoaderData();
       const meta = data?.metaobject;
-      const actionData = useActionData(); 
+      const actionData = useActionData();
 
       const Navigate = useNavigate();
 
@@ -139,6 +143,7 @@ export default function Signup() {
         console.log("Action Data: ", actionData);
         if (actionData?.id) {
           localStorage.setItem('token', actionData.id);
+          localStorage.setItem('customerAccessToken', actionData.accessToken);
           window.location.href = '/'; // Redirect manually on client
         }
       }, [actionData]);
