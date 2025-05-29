@@ -78,8 +78,17 @@ export default function Login() {
 
   console.log("actionData: ", actionData);
 
-  useEffect(()=>{
+  useEffect(()=>{ 
+    const error = actionData?.error;
+    if(actionData!=null && actionData!='undefined' && !error){
     localStorage.setItem('customerAccessToken', actionData?.customerAccessToken.accessToken);
+    }
+
+    if (actionData?.success) {
+      console.log("Login successful, redirecting to home page.");
+      window.location.href = '/'; // Redirect to home page
+    }
+
   },[actionData]); 
 
   const { 

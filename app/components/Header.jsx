@@ -1,13 +1,16 @@
-import {Suspense} from 'react';
+import {Suspense, useEffect, useState} from 'react';
 import {Await, NavLink, useAsyncValue} from '@remix-run/react';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
+import { useRouteLoaderData } from '@remix-run/react';
+
 
 /**
  * @param {HeaderProps}
  */
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
+  
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
@@ -86,20 +89,93 @@ export function HeaderMenu({
  * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
  */
 function HeaderCtas({isLoggedIn, cart}) {
+
+  const rootData =  useRouteLoaderData('root');
+  // console.log('AddToCart fg rootData:', rootData);
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [customerAccessToken, setCustomerAccessToken] = useState('');
+  useEffect(() => {
+    if (rootData?.customerAccessToken?.customer) {
+      const customer = rootData.customerAccessToken.customer;
+      setFirstName(customer.firstName);
+      setLastName(customer.lastName);
+      setEmail(customer.email);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('customerAccessToken') : null;
+      if (token!== null || token !== 'undefined') {
+        setCustomerAccessToken(token); 
+        // console.log('AddToCart fg customerAccessToken:', token);
+      }
+    } else {
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+    }
+  }, [rootData]);
+
+  // const firstName = rootData?.customerAccessToken?.customer?.firstName || 'Guest';
+  // const lastName = rootData?.customerAccessToken?.customer?.lastName || '';
+  // const fullName = `${firstName} ${lastName}`.trim() || 'Guest';
+  // console.log('AddToCart fg fullName:', fullName);
+  // const email = rootData?.customerAccessToken?.customer?.email || 'email';
+  // console.log('AddToCart fg email:', email);
+
+ 
   return (
     <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
+      {/* <HeaderMenuMobileToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
+            df {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign inn')}
           </Await>
         </Suspense>
-      </NavLink>
+      </NavLink> */}
+      {
+        customerAccessToken ? (
+          <NavLink prefetch="intent" to='/' style={activeLinkStyle}
+          //  onClick={() => {
+          //   // console.log('User clicked on account link');
+          //   const isTrue = console.prompt("Are you sure you want to logout? (yes/no)");
+          //   console.log('User confirmed logout:', isTrue);
+          //   const token = typeof window !== 'undefined' ? localStorage.getItem('customerAccessToken') : null;
+          //   // You can add any additional logic here, like tracking the click
+          //   if(token){
+          //     localStorage.removeItem('customerAccessToken');
+              
+          //   }
+          // }
+          // }
+          >
+            {firstName} {lastName}
+          </NavLink>
+        ) : (
+          <NavLink prefetch="intent" to="/" style={activeLinkStyle}>
+            Sign in
+          </NavLink>
+        )
+        
+      } 
+      <div 
+       onClick={() => {
+        console.log('User clicked on logout link');
+        localStorage.removeItem('customerAccessToken');
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setCustomerAccessToken('');
+        }
+       }
+      >
+      { (email) ? 'LogOut' : '' }
+      </div>
       <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
   );
+ 
 }
 
 function HeaderMenuMobileToggle() {

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 //     const customerAccessToken = '5ccb00a6ce180d7b892f57cce0124e5d';
 
-    
+
 //   const query = `
 //     query GetCustomerId($customerAccessToken: String!) {
 //       customer(customerAccessToken: $customerAccessToken) {
@@ -17,7 +17,7 @@ import { useEffect } from "react";
 //   const variables = {
 //     customerAccessToken,
 //   };
- 
+
 //   const response = await context.storefront.query(query, {variables});
 
 //   return json({customerId: response?.customer?.id});
@@ -25,13 +25,29 @@ import { useEffect } from "react";
 // } 
 
 
-export async function action({context, request}) {
+export async function action({ context, request }) {
   try {
-    const form = await request.formData();
+    const qu = `
+  query GetCustomerEmail($customerAccessToken: String!) {
+    customer(customerAccessToken: $customerAccessToken) {
+      email
+    }
+  }
+`; 
  
-    const firstName = form.get('firstName');
-    const lastName = form.get('lastName');
-    const email = form.get('email');
+const vari = {
+  customerAccessToken: '5ccb00a6ce180d7b892f57cce0124e5d', 
+}; 
+
+const response = await context.storefront.query(qu, { vari });
+
+const email = response?.customer?.email;
+
+    const form = await request.formData();
+
+    // const firstName = form.get('firstName');
+    // const lastName = form.get('lastName');
+    // const email = form.get('email');
     const address1 = form.get('address1');
     const city = form.get('city');
     const province = form.get('province');
@@ -44,43 +60,53 @@ export async function action({context, request}) {
     let wishRaw = await wishRes.json();
     const wishData = JSON.parse(wishRaw.customer?.metafield?.value) || [];
 
-       // Step 2: Get variant IDs using Storefront API
-       const productIds = wishData.map(p => p.id);
-       console.log("Product IDs: ", productIds);
-       const query = `
-         query GetVariants($ids: [ID!]!) { 
-           nodes(ids: $ids) {
-             ... on Product {
-               id
-               title
-               variants(first: 1) {
-                 nodes {
-                   id
-                 }
-               }
-             }
-           }
-         }
-       `;
-       const variables = { ids: productIds };
-       const storefrontRes = await context.storefront.query(query, { variables });
+    // Step 2: Get variant IDs using Storefront API
+    const productIds = wishData.map(p => p.id);
+    console.log("Product IDs: ", productIds);
+    const query = `
+  query GetVariants($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on Product {
+        id
+        title
+        variants(first: 1) {
+          nodes {
+            id
+            title
+            price {
+              amount
+              currencyCode
+            }
+            availableForSale
+            quantityAvailable
+          }
+        }
+      }
+    }
+  }
+`;
 
-       const lineItems = storefrontRes.nodes
-       .filter(node => node?.variants?.nodes?.[0]?.id)
-       .map(node => ({
-         variant_id: node.variants.nodes[0].id.split('/').pop(),
-         quantity: 1
-       }));
+    const variables = { ids: productIds };
+    const storefrontRes = await context.storefront.query(query, { variables });
 
+    const lineItems = storefrontRes.nodes
+  .filter(node => {
+    const variant = node?.variants?.nodes?.[0];
+    const price = parseFloat(variant?.price?.amount || 0);
+    const quantityAvailable = variant?.quantityAvailable;
 
+    return variant?.id && price > 0 && quantityAvailable > 0;
+  })
+  .map(node => ({
+    variant_id: node.variants.nodes[0].id.split('/').pop(),
+    quantity: 1
+  }));
 
     // Step 3: Build draft order input
     const draftOrderInput = {
       draft_order: {
         line_items: lineItems,
         customer: {
-          first_name: firstName,
-          last_name: lastName,
           email,
         },
         email,
@@ -103,11 +129,11 @@ export async function action({context, request}) {
       },
     };
 
-     // Step 4: Create draft order
-     const createRes = await fetch(
+    // Step 4: Create draft order
+    const createRes = await fetch(
       `https://${context.env.PUBLIC_STORE_DOMAIN}/admin/api/2023-04/draft_orders.json`,
       {
-        method: 'POST', 
+        method: 'POST',
         headers: {
           'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN,
           'Content-Type': 'application/json',
@@ -122,10 +148,10 @@ export async function action({context, request}) {
       return json({ error: `Failed to create draft order: ${errText}` }, { status: 500 });
     }
 
-    const {draft_order}  = await createRes.json();
+    const { draft_order } = await createRes.json();
 
-     // Step 5: Complete the draft order (optional)
-     const completeRes = await fetch(
+    // Step 5: Complete the draft order (optional)
+    const completeRes = await fetch(
       `https://${context.env.PUBLIC_STORE_DOMAIN}/admin/api/2023-04/draft_orders/${draft_order.id}/complete.json`,
       {
         method: 'PUT',
@@ -143,75 +169,75 @@ export async function action({context, request}) {
     }
 
     return json({
-        firstName,
-        lastName,
-        email,
-        address1,
-        city,
-        province,
-        country,
-        zip,
-        note,
-        wishData,
-        productIds,
-        storefrontRes,
-        lineItems,
-        draft_order
-        // results
-    }); 
-    
+      // firstName,
+      // lastName,
+      email,
+      address1,
+      city,
+      province,
+      country,
+      zip,
+      note,
+      wishData,
+      productIds,
+      storefrontRes,
+      lineItems,
+      draft_order
+      // results
+    });
+
   } catch (error) {
     console.error('Checkout action error:', error);
-    return json({error: 'Internal server error'}, {status: 500});
-  } 
+    return json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
-export default function Checkout(){
+export default function Checkout() {
 
-    const data = useActionData();
+  const data = useActionData();
 
-    // const loaderData = useLoaderData();
-    // console.log("Loader Data: ", loaderData);
+  // const loaderData = useLoaderData();
+  // console.log("Loader Data: ", loaderData);
 
-    // const loadWishList = async () => {         
-    //     const response = await fetch('/wish', {
-    //       method: 'GET', 
-    //       headers: {
-    //         'Content-Type': 'application/json'},
-    //      });
-     
-    //     let res = await response.json();
-    //     res = JSON.parse(res.customer?.metafield?.value) || [];
-    
-    //     return res;
-    //   }
+  // const loadWishList = async () => {         
+  //     const response = await fetch('/wish', {
+  //       method: 'GET', 
+  //       headers: {
+  //         'Content-Type': 'application/json'},
+  //      });
 
-    useEffect(() => {
-        console.log("Data from action: ", data);
-        // const fetchWishlist = async () => {
-        //     const wishData = await loadWishList();
-        //     console.log("WishlistData: ", wishData);
-        // };
-        // fetchWishlist();
-    }, [data]);
-    
+  //     let res = await response.json();
+  //     res = JSON.parse(res.customer?.metafield?.value) || [];
 
-    return (
-        <section className="max-auto text-center">
-            <h1>Checkout</h1>
-            <p>Checkout page is under construction.</p>
-            <Form method="post" className="flex flex-col items-center justify-center mx-auto">
-            <input required name="firstName" placeholder="First Name" className="p-2 border rounded m-2" />
-            <input required name="lastName" placeholder="Last Name" className="p-2 border rounded m-2" />
-            <input required type="email" name="email" placeholder="Email" className="p-2 border rounded m-2" />
-            <input required name="address1" placeholder="Address" className="p-2 border rounded m-2" />
-            <input required name="city" placeholder="City" className="p-2 border rounded m-2" />
-            <input required name="province" placeholder="State/Province" className="p-2 border rounded m-2" />
-            <input required name="country" placeholder="Country" className="p-2 border rounded m-2" />
-            <input required name="zip" placeholder="Zip/Postal Code" className="p-2 border rounded m-2 " />
-            <textarea name="note" placeholder="Order notes (optional)" className="p-2 border rounded m-4" rows={3} />
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Complete Checkout</button>
-            </Form>
-        </section> 
-    )
+  //     return res;
+  //   }
+
+  useEffect(() => {
+    console.log("Data from action: ", data);
+    // const fetchWishlist = async () => {
+    //     const wishData = await loadWishList();
+    //     console.log("WishlistData: ", wishData);
+    // };
+    // fetchWishlist();
+  }, [data]);
+
+
+  return (
+    <section className="max-auto text-center">
+      <h1>Checkout</h1>
+      <p>Checkout page is under construction.</p>
+      <Form method="post" className="flex flex-col items-center justify-center mx-auto">
+        {/* <input required name="firstName" placeholder="First Name" className="p-2 border rounded m-2" />
+        <input required name="lastName" placeholder="Last Name" className="p-2 border rounded m-2" /> */}
+        {/* <input required type="email" name="email" placeholder="Email" className="p-2 border rounded m-2" /> */}
+        <input required name="address1" placeholder="Address" className="p-2 border rounded m-2" />
+        <input required name="city" placeholder="City" className="p-2 border rounded m-2" />
+        <input required name="province" placeholder="State/Province" className="p-2 border rounded m-2" />
+        <input required name="country" placeholder="Country" className="p-2 border rounded m-2" />
+        <input required name="zip" placeholder="Zip/Postal Code" className="p-2 border rounded m-2 " />
+        <textarea name="note" placeholder="Order notes (optional)" className="p-2 border rounded m-4" rows={3} />
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Complete Checkout</button>
+      </Form>
+    </section>
+  )
 } 

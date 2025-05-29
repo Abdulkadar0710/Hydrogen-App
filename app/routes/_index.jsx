@@ -89,16 +89,16 @@ export default function Homepage() {
 
 
   const navigate = useNavigate();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('customerAccessToken') : null;
 
   useEffect(()=>{
-    const token = localStorage.getItem('customerAccessToken');
-    if(token){
+    if(token!== null && token !== 'undefined' && token !== ''){
       console.log("Token: ", token);
     }
     else{
-      navigate('/signup'); 
+      navigate('/login'); 
     }
-  },[])
+  },[token])
  
   // console.log("Datas: ",data);
   return (

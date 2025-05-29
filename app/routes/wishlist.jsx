@@ -30,7 +30,7 @@
 //   }
 // ]
 
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, Link } from '@remix-run/react';
 import { json } from '@shopify/remix-oxygen';
 
 import { CiHeart } from "react-icons/ci";
@@ -189,7 +189,12 @@ export default function WishList() {
                </div>
               </li>
             ))}
+          <Link style={{color: "white"}} to="/checkout" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Proceed to Checkout
+          </Link>  
           </ul>
+          
+          
         ) : (
           <p>Your wishlist is empty.</p>
         )
