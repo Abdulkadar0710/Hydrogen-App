@@ -120,11 +120,11 @@ const email = response?.customer?.email;
         note,
         use_customer_default_address: false,
         tags: 'Created via Hydrogen custom checkout',
-        shipping_line: {
-          title: 'Standard Shipping',
-          price: '0.00',
-          code: 'Free Shipping',
-        },
+        // shipping_line: {
+        //   title: 'Standard Shipping',
+        //   price: '0.00',
+        //   code: 'Free Shipping',
+        // },
         send_invoice: true,
       },
     };

@@ -106,7 +106,7 @@ function HeaderCtas({isLoggedIn, cart}) {
       const token = typeof window !== 'undefined' ? localStorage.getItem('customerAccessToken') : null;
       if (token!== null || token !== 'undefined') {
         setCustomerAccessToken(token); 
-        // console.log('AddToCart fg customerAccessToken:', token);
+        console.log('AddToCart fg customerAccessToken:', rootData);
       }
     } else {
       setFirstName('');

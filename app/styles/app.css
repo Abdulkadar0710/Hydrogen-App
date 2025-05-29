@@ -605,3 +605,14 @@ button.reset:hover:not(:has(> *)) {
   text-align: center;
   display: block;
 }
+
+
+.inputQuantity{
+
+  width: 50px;
+  height: 30px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+
+}

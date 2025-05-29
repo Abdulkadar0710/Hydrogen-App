@@ -108,7 +108,9 @@ export default function WishList() {
 
 
   const [wishlist, setWishlist] = useState([]);
+  const [otherWishList, setOtherWishList] = useState([]);
   const [flag, setFlag] = useState(true);
+  const [wishIds, setWishIds] = useState([]);
  
   const loadWishList = async () => {         
     const response = await fetch('/wish', {
@@ -129,6 +131,21 @@ export default function WishList() {
     // console.log("Data: ", data); 
   },[])  
 
+//   const getProductDetails = async() => {
+//     const response = await fetch('/fetchProductsInfoById');
+
+//     const data = await response.json();
+//     return data;
+// }
+
+// useEffect(() => {
+//     getProductDetails().then(data => {
+//         console.log("Product Details: ", data);
+//     }).catch(error => {
+//         console.error("Error fetching product details: ", error);
+//     });
+// }, [wishlist]);
+
 
   const fetchWishList = async () => {
     const response = await fetch('/wish', { // Changed from './api/wish'
@@ -139,6 +156,9 @@ export default function WishList() {
     let data = await response.json();
     data = JSON.parse(data.customer?.metafield?.value) || [];
     setWishlist(data || []);
+    // const temp = data.map(item => item.id);
+    // setWishIds(temp);
+    // console.log("Wish IDs:", temp);
     console.log('Fetched Wishlist:', data);
   };
 
@@ -159,6 +179,9 @@ export default function WishList() {
         });
         const updatedData = await updatedResponse.json();
 
+        // setWishIds(updatedData.map(item => item.id));
+        // console.log("Updated Wish IDs:", wishIds);
+
         console.log("updatedData:", updatedData); 
 
 
@@ -170,6 +193,44 @@ export default function WishList() {
   useEffect(() => {
     fetchWishList();
   }, []);
+
+
+const fetchDataFromUrl = async () => {
+  const res = await fetch(`/fetchProductsInfoById?id=8649199812836`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': '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', // Fix env reference
+    }, 
+  });
+
+  const data = await res.json();
+  setOtherWishList(data);
+  return data;
+}
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchDataFromUrl();
+        console.log("Fetched Data: ", data);
+        // otherWishListData(data);
+        // console.log("Other Wishlist Data: ", otherWishList);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } 
+    }; 
+
+    fetchData();
+  }
+  , []);
+
+
+
+  useEffect(()=>{
+    console.log("set otherWishList: ", otherWishList);
+  }, [otherWishList])
+
 
   return (
     <div>
@@ -184,6 +245,21 @@ export default function WishList() {
                <div className="textBox flex flex-col justify-center ml-4">
                <div className="">{item.title}</div>
                <div>{item.description}</div>
+               <div>{item.price}</div>
+               <div>{
+                
+                // Array.isArray(otherWishList) && otherWishList.filter((wish) => wish.id === item.id).map((wish) => {
+                //   return (
+                //     <div key={wish.id}>
+                //       <p>Vendor: {wish.vendor}</p>
+                //       <p>Description: {wish.description}</p>
+                //       <Link to={`/products/${wish.handle}`} className="text-blue-500 hover:underline">View Product</Link>
+                //     </div>
+                //   );
+                // })
+
+                }</div>
+               <input className="inputQuantity" type="number" name="" min={1} defaultValue={1} id="" />
                <div className="lhParent" onClick={()=>removeFronCart(item.id)}>{ flag ? <FaHeart/> : <CiHeart/>}</div>
                </div>
                </div>

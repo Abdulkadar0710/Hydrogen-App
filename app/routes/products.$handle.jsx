@@ -135,7 +135,8 @@ export default function Product() {
     vendor: currentProduct.vendor,  
     description: currentProduct.description,
     handle: currentProduct.handle,
-    image: currentProduct.selectedOrFirstAvailableVariant.image.url
+    image: currentProduct.selectedOrFirstAvailableVariant.image.url,
+    price: currentProduct.selectedOrFirstAvailableVariant.price.amount,
   };
 
   // console.log("Product to save: ",productToSave);
