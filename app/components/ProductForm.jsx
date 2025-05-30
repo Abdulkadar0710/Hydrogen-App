@@ -1,9 +1,9 @@
 import {Link, useLoaderData, useNavigate} from '@remix-run/react';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
+import { json } from '@shopify/remix-oxygen';
 
-
-export async function loader({context}) {
+export async function loader({context}) {   
 //   const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; // Replace with actual logic to get customer access token
 
 //   if (!customerAccessToken) {
@@ -11,7 +11,7 @@ export async function loader({context}) {
 //   }
 
 //   // const wishlist = await fetchCustomerWishlist(context, customerAccessToken);
-  
+    
 //   const query = `#graphql
 //   query GetCustomerWishlist($customerAccessToken: String!) {
 //     customer(customerAccessToken: $customerAccessToken) {
@@ -21,7 +21,7 @@ export async function loader({context}) {
 //       lastName
 //       metafield(namespace: "custom", key: "wishl") {
 //         value 
-//       }
+//       } 
 //     }
 //   }
 // `;
@@ -32,7 +32,7 @@ export async function loader({context}) {
 
     // const parsedWishlist = response?.customer?.metafield?.value ? JSON.parse(response.customer.metafield.value) : [];
 
-  return json({success: true});
+  return json({iam: "Hii"});
 
   
 } 

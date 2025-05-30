@@ -68,7 +68,7 @@ export async function loader(args) {
   const params = new URLSearchParams(request.url);
   const customerAccess = params.get('customerAccessToken') || token;
 
-  return {...deferredData, ...criticalData, customerId: response?.customer?.id || null, token: token || null,params: customerAccess}; 
+  return {...deferredData, ...criticalData, customerId: response?.customer?.id || null, token: token || null,params: customerAccess, hii: "Hiii"}; 
 }
 
 

@@ -1,21 +1,50 @@
-import { useLoaderData, json } from '@remix-run/react';
-import { useEffect } from 'react';
+import React, { useState } from 'react';
+import { json } from '@shopify/remix-oxygen';
 
-export async function loader() {
-  return json({ message: 'Hello from Practice 2!' });
-}
+export default function Prac2() {
+  const [file, setFile] = useState(null);
 
-export default function Practice2() {
-  const data = useLoaderData();
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
 
-  useEffect(() => {
-    console.log('Practice 2 data:', data);
-  }, [data]);
+  const handleUpload = async (event) => {
+    event.preventDefault();
+    if (!file) {
+      alert('Please select a file first!');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/add-to-cart-from-csv', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) { 
+        alert('File uploaded successfully!');
+        console.log('File upload response:', data);
+      } else {
+        alert('Failed to upload file.');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('An error occurred while uploading the file.');
+    }
+  };
 
   return (
-    <section className="p-6 max-w-3xl mx-auto text-center">
-      <h2>Practice 2</h2>
-      <p>{data.message}</p>
-    </section>
+    <div>
+      <h1>Upload CSV File</h1>
+      <form onSubmit={handleUpload}>
+        <input type="file" accept=".csv" onChange={handleFileChange} />
+        <button type="submit">Upload</button>
+      </form>
+    </div>
   );
 }
