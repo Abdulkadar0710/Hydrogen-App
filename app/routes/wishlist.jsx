@@ -1,34 +1,3 @@
-// saved data
-// [
-//   {
-//     "id": "gid://shopify/Product/111",
-//     "title": "Cool Shirt",
-//     "vendor": "Nike",
-//     "description": "A cool shirt",
-//     "handle": "cool-shirt"
-//   },
-//   {
-//     "id": "gid://shopify/Product/8649204596964",
-//     "title": "pants",
-//     "vendor": "Abdul-gwl",
-//     "description": "ragzo formal pants",
-//     "handle": "pants-2"
-//   },
-//   {
-//     "id": "gid://shopify/Product/8649202270436",
-//     "title": "tshirt",
-//     "vendor": "Abdul-gwl",
-//     "description": "full sleves tshirt.",
-//     "handle": "tshirt-3"
-//   },
-//   {
-//     "id": "gid://shopify/Product/8649201713380",
-//     "title": "tshirt",
-//     "vendor": "Abdul-gwl",
-//     "description": "cotton printed tshirt",
-//     "handle": "tshirt-2"
-//   }
-// ]
 
 import { useLoaderData, Link } from '@remix-run/react';
 import { json } from '@shopify/remix-oxygen';
@@ -36,39 +5,9 @@ import { json } from '@shopify/remix-oxygen';
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
 import { useEffect, useState } from 'react';
+import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
 
-// export async function loader({ context }) {
-//   const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6';
-
-//   if (!customerAccessToken) {
-//     console.warn('No customer access token found. Returning empty wishlist.');
-//     return json({ wishlist: [] });
-//   }
-
-//   const query = `#graphql
-//   query GetCustomerWishlist($customerAccessToken: String!) {
-//     customer(customerAccessToken: $customerAccessToken) {
-//       id
-//       email
-//       firstName
-//       lastName
-//       metafield(namespace: "custom", key: "wishl") {
-//         value 
-//       }
-//     }
-//   }
-// `;
-
-//     const response = await context.storefront.query(query, {
-//       variables: { customerAccessToken },
-//     });
-
-//     const parsedWishlist = response?.customer?.metafield?.value
-//       ? JSON.parse(response.customer.metafield.value)
-//       : [];
-//     console.log("Parsed Wishlist:", parsedWishlist);
-//     return json(response);
-// }
 
 export async function loader({ context, request }) {
 
@@ -86,10 +25,12 @@ export async function loader({ context, request }) {
   const variables = {
     customerAccessToken,
   };
+
+  const cart = await context.cart.get();
  
   const response = await context.storefront.query(query, {variables});
-
-  return json({customerId: response?.customer?.id});
+  // console.log("Context: ", context);
+  return json({customerId: response?.customer?.id, contextCart: cart});
 
 }
 
@@ -98,11 +39,14 @@ export async function loader({ context, request }) {
 export default function WishList() {
 
   const {customerId}  = useLoaderData();
+  const {contextCart} = useLoaderData();
+  // console.log("contextCart in WishList: ", contextCart);
+  const {open} = useAside();
   
   useEffect(() =>  { 
     setTimeout(() => {
       
-      console.log("Customer ID: ", customerId);
+      // console.log("Customer ID: ", customerId);
     }, 3000);
   },[customerId])
 
@@ -128,27 +72,46 @@ export default function WishList() {
   useEffect(()=>{
     const data = loadWishList();
     setWishlist(data || []);
-    // console.log("Data: ", data); 
   },[])  
 
-//   const getProductDetails = async() => {
-//     const response = await fetch('/fetchProductsInfoById');
+  // useEffect(() => {
+  
+  //   let arr = [];
+  //   console.log("Wishlist: ", wishlist);
 
-//     const data = await response.json();
-//     return data;
-// }
+  //   if(wishlist.length > 0) {
+  //   wishlist.forEach((item) => {
+  //     const id = getProductId(item.id);
+  //     const fetchProduct = async () => {
+  //       const res = await fetch(`/fetchProductsInfoById?id=${id}`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'X-Shopify-Access-Token': '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', // Fix env reference
+  //         },
+  //       });
 
-// useEffect(() => {
-//     getProductDetails().then(data => {
-//         console.log("Product Details: ", data);
-//     }).catch(error => {
-//         console.error("Error fetching product details: ", error);
-//     });
-// }, [wishlist]);
+  //       const data = await res.json();
+  //       return data; 
+  //     }
+      
+  //     fetchProduct().then((productData) => {
+  //       console.log("Product Data in AddToCartButton: ", productData);
+  //        arr.push(productData);
+  //     }).catch
+  //     ((error) => {
+  //       console.error("Error fetching product data: ", error);
+  //     });
+  //   })  
+  //   }
+
+  //   console.log("Wishlist IDs: ", arr);
+
+  // },[wishlist])  
 
 
   const fetchWishList = async () => {
-    const response = await fetch('/wish', { // Changed from './api/wish'
+    const response = await fetch('/wish', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'},
@@ -156,19 +119,16 @@ export default function WishList() {
     let data = await response.json();
     data = JSON.parse(data.customer?.metafield?.value) || [];
     setWishlist(data || []);
-    // const temp = data.map(item => item.id);
-    // setWishIds(temp);
-    // console.log("Wish IDs:", temp);
-    console.log('Fetched Wishlist:', data);
+    // console.log('Fetched Wishlist:', data);
   };
 
   const removeFronCart = async (id) => { 
 
-    console.log("Removing item with ID:", id);
-    console.log("Wishlist before removal:", wishlist);
+    // console.log("Removing item with ID:", id);
+    // console.log("Wishlist before removal:", wishlist);
    
     const updatedWishlist = wishlist.filter(item => item.id !== id);
-    console.log("Wishlist After removal:", updatedWishlist);
+    // console.log("Wishlist After removal:", updatedWishlist);
 
         const updatedResponse = await fetch('/addToWishList', { 
           method: 'POST', 
@@ -179,10 +139,7 @@ export default function WishList() {
         });
         const updatedData = await updatedResponse.json();
 
-        // setWishIds(updatedData.map(item => item.id));
-        // console.log("Updated Wish IDs:", wishIds);
-
-        console.log("updatedData:", updatedData); 
+        // console.log("updatedData:", updatedData);
 
 
     setWishlist(updatedWishlist);
@@ -213,9 +170,7 @@ const fetchDataFromUrl = async () => {
     const fetchData = async () => {
       try {
         const data = await fetchDataFromUrl();
-        console.log("Fetched Data: ", data);
-        // otherWishListData(data);
-        // console.log("Other Wishlist Data: ", otherWishList);
+        // console.log("Fetched Data: ", data);
       } catch (error) {
         console.error("Error fetching data: ", error);
       } 
@@ -227,10 +182,11 @@ const fetchDataFromUrl = async () => {
 
 
 
-  useEffect(()=>{
-    console.log("set otherWishList: ", otherWishList);
-  }, [otherWishList])
-
+  const getProductId = (id) => {
+   const productId = id.split('/').pop();
+  //  console.log("Product ID: ", productId);
+   return productId;
+  }
 
   return (
     <div>
@@ -246,20 +202,9 @@ const fetchDataFromUrl = async () => {
                <div className="">{item.title}</div>
                <div>{item.description}</div>
                <div>{item.price}</div>
-               <div>{
-                
-                // Array.isArray(otherWishList) && otherWishList.filter((wish) => wish.id === item.id).map((wish) => {
-                //   return (
-                //     <div key={wish.id}>
-                //       <p>Vendor: {wish.vendor}</p>
-                //       <p>Description: {wish.description}</p>
-                //       <Link to={`/products/${wish.handle}`} className="text-blue-500 hover:underline">View Product</Link>
-                //     </div>
-                //   );
-                // })
-
-                }</div>
-               <input className="inputQuantity" type="number" name="" min={1} defaultValue={1} id="" />
+               <Link to={`/products/${item.handle}`} className="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                View Product
+               </Link>
                <div className="lhParent" onClick={()=>removeFronCart(item.id)}>{ flag ? <FaHeart/> : <CiHeart/>}</div>
                </div>
                </div>

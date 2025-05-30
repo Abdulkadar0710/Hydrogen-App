@@ -115,7 +115,7 @@ function loadDeferredData({context, params}) {
   // For example: product reviews, product recommendations, social feeds.
 
   return {};
-}
+} 
 
 
 export default function Product() {
@@ -125,7 +125,7 @@ export default function Product() {
   /** @type {LoaderReturnData} */
   const {product} = useLoaderData();
   const [currentProduct, setCurrentProduct] = useState(product);
-  console.log("Current Product: ",currentProduct);
+  // console.log("Current Product: ",currentProduct);
 
   const {customerId} = useLoaderData();
 
@@ -142,7 +142,7 @@ export default function Product() {
   // console.log("Product to save: ",productToSave);
   // console.log("Product: ",product);
   const data = useLoaderData(); 
-  console.log("Data: ",data);
+  // console.log("Data: ",data);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -220,7 +220,7 @@ export default function Product() {
         body: JSON.stringify({wishlist: data, customerId: customerId}),
       });
       const updatedData = await updatedResponse.json();
-      console.log('updated Wishlist added one:', updatedData);
+      // console.log('updated Wishlist added one:', updatedData);
     }
       else{
         // console.log('Before Updated Wishlist:', data);
@@ -252,13 +252,13 @@ export default function Product() {
           compareAtPrice={selectedVariant?.compareAtPrice}
         />
         <br />
-        {/* <ProductForm
+        <ProductForm
           productOptions={productOptions}
           selectedVariant={selectedVariant}
-        /> */}
+        />
         <div className="addToCart"
         onClick={addToCart}
-        >Add To Cart { flag==true ? <CiHeart /> : <FaHeart />}</div>
+        >{ flag==true ? <CiHeart /> : <FaHeart />}</div>
         <br />
         <br />
         <p>

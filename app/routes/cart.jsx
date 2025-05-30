@@ -1,6 +1,7 @@
 import {useLoaderData} from '@remix-run/react';
 import {CartForm} from '@shopify/hydrogen';
 import {data} from '@shopify/remix-oxygen';
+import { useEffect } from 'react';
 import {CartMain} from '~/components/CartMain';
 
 /**
@@ -104,12 +105,25 @@ export async function action({request, context}) {
  */
 export async function loader({context}) {
   const {cart} = context;
+
+  if (cart && cart.id) {
+    const checkoutUrl = await cart.getCheckoutUrl();
+    return { ...cart, checkoutUrl };
+  }
+
   return await cart.get();
 }
 
 export default function Cart() {
   /** @type {LoaderReturnData} */
   const cart = useLoaderData();
+
+  useEffect(() => {
+    // Log cart data to console for debugging
+    console.log('Cart loaded:', cart);
+  }
+  , [cart]);
+  console.log('Cart data:', cart);
 
   return (
     <div className="cart">

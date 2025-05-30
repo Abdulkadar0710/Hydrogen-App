@@ -9,13 +9,15 @@ import {CartForm} from '@shopify/hydrogen';
  *   onClick?: () => void;
  * }}
  */
-export function AddToCartButton({
+export function AddToCartButton({ 
   analytics,
   children,
   disabled,
   lines,
   onClick,
 }) {
+
+  // console.log("AddToCartButton lines: ", lines);
   return (
     <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher) => (

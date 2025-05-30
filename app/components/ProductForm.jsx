@@ -4,35 +4,35 @@ import {useAside} from './Aside';
 
 
 export async function loader({context}) {
-  const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; // Replace with actual logic to get customer access token
+//   const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; // Replace with actual logic to get customer access token
 
-  if (!customerAccessToken) {
-    return json({wishlist: []});
-  }
+//   if (!customerAccessToken) {
+//     return json({wishlist: []});
+//   }
 
-  // const wishlist = await fetchCustomerWishlist(context, customerAccessToken);
+//   // const wishlist = await fetchCustomerWishlist(context, customerAccessToken);
   
-  const query = `#graphql
-  query GetCustomerWishlist($customerAccessToken: String!) {
-    customer(customerAccessToken: $customerAccessToken) {
-      id
-      email
-      firstName
-      lastName
-      metafield(namespace: "custom", key: "wishl") {
-        value 
-      }
-    }
-  }
-`;
+//   const query = `#graphql
+//   query GetCustomerWishlist($customerAccessToken: String!) {
+//     customer(customerAccessToken: $customerAccessToken) {
+//       id
+//       email
+//       firstName
+//       lastName
+//       metafield(namespace: "custom", key: "wishl") {
+//         value 
+//       }
+//     }
+//   }
+// `;
 
-    const response = await context.storefront.query(query, {
-      variables: { customerAccessToken },
-    });
+//     const response = await context.storefront.query(query, {
+//       variables: { customerAccessToken },
+//     });
 
-    const parsedWishlist = response?.customer?.metafield?.value ? JSON.parse(response.customer.metafield.value) : [];
+    // const parsedWishlist = response?.customer?.metafield?.value ? JSON.parse(response.customer.metafield.value) : [];
 
-  return json({vaL: response});
+  return json({success: true});
 
   
 } 
@@ -47,10 +47,12 @@ export async function loader({context}) {
  * }}
  */
 export function ProductForm({productOptions, selectedVariant}) {
+  // console.log("Product Options: ", productOptions);
+  // console.log("Selected Variant: ", selectedVariant);
   const navigate = useNavigate();
   const {open} = useAside(); 
   const data = useLoaderData();
-  console.log("Dataaa: ", data); 
+  console.log("I am Dataaa: ", data); 
   return (
     <div className="product-form">
       {productOptions.map((option) => {
@@ -138,7 +140,7 @@ export function ProductForm({productOptions, selectedVariant}) {
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
-          // open('cart');
+          open('cart');
           // handleAddToCart();
         }}
         lines={
