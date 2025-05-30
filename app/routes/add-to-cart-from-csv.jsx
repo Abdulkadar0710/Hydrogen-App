@@ -20,7 +20,7 @@ export async function action({request, context}) {
 
     // Parse CSV
     const csvText = await file.text();
-    const parsedData = Papa.parse(csvText, {
+    const parsedData = Papa.parse(csvText, { 
       header: true,
       skipEmptyLines: true,
     });
@@ -36,7 +36,7 @@ export async function action({request, context}) {
   const cartLines = [];
   let result = [];
 
-  for (const row of records) { 
+  for (const row of records) {
     const sku = row.sku?.trim();
     const quantity = parseInt(row.quantity);
     console.log(`Adding SKU: ${sku}, Quantity: ${quantity}`);
@@ -78,14 +78,26 @@ export async function action({request, context}) {
 
 
 
-  // Create cart using Storefront API
-  const storefrontCart = await context.storefront.mutate(
+  const updateCart = await context.storefront.mutate(
     `
-    mutation CreateCart($lines: [CartLineInput!]!) {
-      cartCreate(input: { lines: $lines }) {
+    mutation AddLinesToCart($cartId: ID!, $lines: [CartLineInput!]!) {
+      cartLinesAdd(cartId: $cartId, lines: $lines) {
         cart {
           id
           checkoutUrl
+          lines(first: 10) {
+            edges {
+              node {
+                merchandise {
+                  ... on ProductVariant {
+                    id
+                    title
+                  }
+                }
+                quantity
+              }
+            }
+          }
         }
         userErrors {
           field
@@ -94,10 +106,13 @@ export async function action({request, context}) {
       }
     }
     `,
-    { variables: { lines: cartLines } }
+    {
+      variables: {
+        cartId,
+        lines: cartLines,
+      },
+    }
   );
-
-  const cart = storefrontCart?.cartCreate?.cart;
 
 
 
@@ -105,7 +120,7 @@ export async function action({request, context}) {
       message: 'File received successfully',
       filename: file.name,
       records: records,
-      cart: cart
+      updateCart: updateCart
     }
   );
    
