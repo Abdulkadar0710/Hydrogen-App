@@ -8,7 +8,6 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
-  useLoaderData,
 } from '@remix-run/react';
 import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
@@ -16,7 +15,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
-
+ 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
@@ -72,25 +71,6 @@ export async function loader(args) {
 
   const {storefront, env} = args.context;
 
-
-  const customerAccessToken = "5ccb00a6ce180d7b892f57cce0124e5d"; // Add your token here
-
-  const QUERY = `#graphql
-    query getCustomer($customerAccessToken: String!) {
-      customer(customerAccessToken: $customerAccessToken) {
-        firstName
-        lastName
-        email
-      }
-    }
-  `;
-
-  const data = await storefront.query(QUERY, {
-    variables: {
-      customerAccessToken,
-    },
-  });
-
   return {
     ...deferredData,
     ...criticalData,
@@ -107,7 +87,6 @@ export async function loader(args) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
-    customerAccessToken: data
   };
 }
 
@@ -200,9 +179,7 @@ export function Layout({children}) {
 }
 
 export default function App() {
-  const data = useLoaderData();
-  // console.log('App data:', data);
-  return <Outlet data={data} />;
+  return <Outlet />;
 }
 
 export function ErrorBoundary() {

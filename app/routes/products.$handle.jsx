@@ -162,6 +162,32 @@ export default function Product() {
 
   const {title, descriptionHtml} = product;
 
+  const getProductId = (id) => {
+    const productId = id.split('/').pop();
+   //  console.log("Product ID: ", productId);
+    return productId; 
+   }
+
+  useEffect(() => {
+    
+    const putLastViewed = async () => {
+      const productId = getProductId(data.product.id);
+      const updateLasrViewed = await fetch('/update-last-viewed', { 
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json',  
+        }, 
+        body: JSON.stringify({productId: productId}),
+      });
+
+      const last = await updateLasrViewed.json(); 
+      console.log("Last Viewed: ",last);
+    }
+
+      putLastViewed();
+
+  }, []);
+
 
 
   useEffect(() => {

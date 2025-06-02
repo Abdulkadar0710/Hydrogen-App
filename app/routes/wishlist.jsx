@@ -36,8 +36,7 @@ export async function loader({ context, request }) {
 
 
 
-export default function WishList() {
-
+export default function WishList() { 
   const {customerId}  = useLoaderData();
   const {contextCart} = useLoaderData();
   // console.log("contextCart in WishList: ", contextCart);
@@ -72,42 +71,7 @@ export default function WishList() {
   useEffect(()=>{
     const data = loadWishList();
     setWishlist(data || []);
-  },[])  
-
-  // useEffect(() => {
-  
-  //   let arr = [];
-  //   console.log("Wishlist: ", wishlist);
-
-  //   if(wishlist.length > 0) {
-  //   wishlist.forEach((item) => {
-  //     const id = getProductId(item.id);
-  //     const fetchProduct = async () => {
-  //       const res = await fetch(`/fetchProductsInfoById?id=${id}`, {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           'X-Shopify-Access-Token': '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', // Fix env reference
-  //         },
-  //       });
-
-  //       const data = await res.json();
-  //       return data; 
-  //     }
-      
-  //     fetchProduct().then((productData) => {
-  //       console.log("Product Data in AddToCartButton: ", productData);
-  //        arr.push(productData);
-  //     }).catch
-  //     ((error) => {
-  //       console.error("Error fetching product data: ", error);
-  //     });
-  //   })  
-  //   }
-
-  //   console.log("Wishlist IDs: ", arr);
-
-  // },[wishlist])  
+  },[])
 
 
   const fetchWishList = async () => {
