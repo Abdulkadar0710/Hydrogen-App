@@ -61,12 +61,48 @@ export async function action({ request, context }) {
       const metafieldData = await metafieldsRes.json(); 
     let existingValue = metafieldData?.data?.customer?.metafield?.value || "";
 
+
+
+
+    //get the limit for recently viewed items from metaObjects
+    const metaObj = await fetch(`https://${context.env.PUBLIC_STORE_DOMAIN}/admin/api/2024-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': context.env.PRIVATE_STOREFRONT_API_TOKEN, // Admin token here!
+      },
+      body: JSON.stringify({
+          query: `
+            query {
+              metaobjects(type: "maxRecentItemsLimit", first: 1) {
+                nodes {
+                  id
+                  handle
+                  type
+                  fields {
+                    key
+                    value
+                  }
+                }
+              }
+            }
+          `,
+        }),
+      });
+    
+    const dd = await metaObj.json();
+    const val = dd.data.metaobjects.nodes[0].fields[0].value;
+    // console.log("MetaObject Value: ", val); 
+
+
+    
+
       let parsedValue = existingValue.split(" ");
 
       parsedValue = parsedValue.filter((id) => id != productId); // Remove the productId if it already exists
 
       parsedValue.unshift(productId);
-      parsedValue = parsedValue.slice(0, 9); // Limit to the first 9 values
+      parsedValue = parsedValue.slice(0, val); // Limit to the first 9 values
 
 
       const updatedValue = parsedValue.join(" ");

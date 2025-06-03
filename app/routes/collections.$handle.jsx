@@ -76,6 +76,7 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
+  console.log('Collection data:', collection.products.nodes); 
 
   return (
     <div className="collection">

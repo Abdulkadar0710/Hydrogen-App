@@ -125,9 +125,52 @@ export default function Cart() {
   , [cart]);
   console.log('Cart data:', cart);
 
+
+
+  function exportCartToCSV(cart) {
+    if (!cart || !cart.lines || cart.lines.length === 0) {
+      alert('Cart is empty or invalid.');
+      return;
+    }
+  
+    const headers = ['title', 'quantity'];
+    const rows = cart.lines.nodes.map((line) => {
+      const title = line.merchandise?.product?.title || '';
+      const quantity = line.quantity || 0;
+      return [title, quantity];
+    });
+  
+    const csvContent = [headers, ...rows]
+      .map((row) => row.join(','))
+      .join('\n');
+  
+    const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cart.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  
+
+
+
   return (
     <div className="cart">
-      <h1>Cart</h1>
+      <h1>Cart</h1> 
+      <button
+       onClick={()=>exportCartToCSV(cart)}
+       style={{
+          backgroundColor: '#0070f3',
+          color: 'white',
+          padding: '10px 20px',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginBottom: '20px'
+       }}
+      >Export to csv</button>
       <CartMain layout="page" cart={cart} />
     </div>
   );
