@@ -115,5 +115,11 @@ export async function action({ request, context }) {
        customer: customer,
        parsedValue: parsedValue,
        updatedValue: updatedValue
+    },{
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Content-Type': 'application/json',
+        }
     });
 }
