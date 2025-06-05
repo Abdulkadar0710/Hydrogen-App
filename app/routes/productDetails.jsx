@@ -197,7 +197,7 @@ export default function Product() {
      });
 
     let data = await response.json();
-    data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
+    // data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
 
     // console.log("flag: ",flag); 
      if(flag){
@@ -254,7 +254,7 @@ export default function Product() {
         <br />
         <br />
         <p>
-          <strong>Description</strong>
+          <strong>Description fgf</strong>
         </p>
         <br />
         <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />

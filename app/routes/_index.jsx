@@ -3,6 +3,8 @@ import {Suspense, useEffect} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import {useNavigate} from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import ChangeLanguage from './ChangeLanguage';
 
 /**
  * @type {MetaFunction}
@@ -103,6 +105,7 @@ export default function Homepage() {
   // console.log("Datas: ",data);
   return (
     <div className="home">
+      <ChangeLanguage />
       <Banner/>
       <AllCollectionsQuery collections={data.allCollections} />
       {/* <FeaturedCollection collection={data.featuredCollection} /> */}
@@ -120,6 +123,9 @@ function FeaturedCollection({collection}) {
   // console.log("Collection: ", collection);
   if (!collection) return null;
   const image = collection?.image;
+
+  const { t } = useTranslation('common');
+  
   return (
     <Link
       className="featured-collection"
@@ -130,7 +136,7 @@ function FeaturedCollection({collection}) {
           <Image data={image} sizes="100vw" />
         </div>
       )}
-      <h1>{collection.title}</h1>
+      <h1>{t(collection.title)}</h1>
     </Link>
   );
 }
@@ -169,9 +175,11 @@ function AllCollectionsQuery({collections}) {
   // console.log("all: ",collections);
   if (!collections || !collections.collections) return null;
 
+  const { t } = useTranslation('common');
+
   return (
     <div className="recommended-products"> 
-      <h2>All Collections by AK</h2> <br />
+      <h2>{t('AllCollectionsbyAK')}</h2> <br /> 
       <div className="recommended-products-grid">
         {collections.collections.nodes.map((collection) => (
           <Link key={collection.id} to={`/collections/${collection.handle}`}>
@@ -179,7 +187,7 @@ function AllCollectionsQuery({collections}) {
               {collection.image && (
                 <Image data={collection.image} alt={collection.title} />
               )}
-              <h3>{collection.title}</h3>
+              <h3>{t(collection.title)}</h3>
             </div>
           </Link>
         ))}
@@ -281,11 +289,13 @@ const ALL_COLLECTIONS_QUERY = `#graphql
 function Banner() {
   // console.log("Banner component loaded sucessfully ");
 
+  const { t } = useTranslation('common');
+
   return (
     <section className="banner">
      <div className="banner-info">
-      <h1>Style That Speaks for You</h1>
-      <p>Discover timeless fashion and everyday essentials with a modern edge. From casual tees to standout pieces, find your perfect look in our latest collection.</p>
+      <h1>{t('BannerTitle')}</h1>
+      <p>{t('BannerDescription')}</p>
      </div>       
     </section>
   );

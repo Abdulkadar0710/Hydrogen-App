@@ -7,6 +7,7 @@ import { FaHeart } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
+import i18n from '~/i18n';
 
 
 export async function loader({ context, request }) {
@@ -56,14 +57,14 @@ export default function WishList() {
   const [wishIds, setWishIds] = useState([]);
  
   const loadWishList = async () => {         
-    const response = await fetch('/wish', {
+    const response = await fetch(`/wish?lang=${i18n.language}`, {
       method: 'GET', 
       headers: {
         'Content-Type': 'application/json'},
      });
 
     let data = await response.json();
-    data = JSON.parse(data.customer?.metafield?.value) || [];
+    // data = JSON.parse(data.customer?.metafield?.value) || [];
 
     return data;
   }
@@ -75,13 +76,13 @@ export default function WishList() {
 
 
   const fetchWishList = async () => {
-    const response = await fetch('/wish', {
+    const response = await fetch(`/wish?lang=${i18n.language}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'},
     });
     let data = await response.json();
-    data = JSON.parse(data.customer?.metafield?.value) || [];
+    // data = JSON.parse(data.customer?.metafield?.value) || [];
     setWishlist(data || []);
     // console.log('Fetched Wishlist:', data);
   };

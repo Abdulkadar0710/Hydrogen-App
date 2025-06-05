@@ -288,6 +288,16 @@ export type FooterQuery = {
   >;
 };
 
+export type GetCustomerQueryVariables = StorefrontAPI.Exact<{
+  customerAccessToken: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type GetCustomerQuery = {
+  customer?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Customer, 'firstName' | 'lastName' | 'email'>
+  >;
+};
+
 export type StoreRobotsQueryVariables = StorefrontAPI.Exact<{
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
@@ -677,6 +687,58 @@ export type CatalogQuery = {
       'hasPreviousPage' | 'hasNextPage' | 'startCursor' | 'endCursor'
     >;
   };
+};
+
+export type GetCustomerWishlistQueryVariables = StorefrontAPI.Exact<{
+  customerAccessToken: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type GetCustomerWishlistQuery = {
+  customer?: StorefrontAPI.Maybe<{
+    metafield?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+  }>;
+};
+
+export type GetWishlistProductsQueryVariables = StorefrontAPI.Exact<{
+  ids:
+    | Array<StorefrontAPI.Scalars['ID']['input']>
+    | StorefrontAPI.Scalars['ID']['input'];
+  language: StorefrontAPI.LanguageCode;
+}>;
+
+export type GetWishlistProductsQuery = {
+  nodes: Array<
+    StorefrontAPI.Maybe<
+      Pick<
+        StorefrontAPI.Product,
+        'id' | 'title' | 'description' | 'handle' | 'vendor'
+      > & {
+        featuredImage?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.Image, 'url' | 'altText'>
+        >;
+        priceRange: {
+          minVariantPrice: Pick<
+            StorefrontAPI.MoneyV2,
+            'amount' | 'currencyCode'
+          >;
+          maxVariantPrice: Pick<
+            StorefrontAPI.MoneyV2,
+            'amount' | 'currencyCode'
+          >;
+        };
+        variants: {
+          nodes: Array<
+            Pick<StorefrontAPI.ProductVariant, 'id' | 'title'> & {
+              price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+              image?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
+      }
+    >
+  >;
 };
 
 export type CustomerAccessTokenCreateMutationVariables = StorefrontAPI.Exact<{
@@ -1244,14 +1306,29 @@ export type CustomerCreateMutation = {
   }>;
 };
 
-export type GetCustomerWishlistQueryVariables = StorefrontAPI.Exact<{
-  customerAccessToken: StorefrontAPI.Scalars['String']['input'];
+export type GetProductsQueryVariables = StorefrontAPI.Exact<{
+  ids:
+    | Array<StorefrontAPI.Scalars['ID']['input']>
+    | StorefrontAPI.Scalars['ID']['input'];
 }>;
 
-export type GetCustomerWishlistQuery = {
-  customer?: StorefrontAPI.Maybe<{
-    metafield?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
-  }>;
+export type GetProductsQuery = {
+  nodes: Array<
+    StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.Product, 'id' | 'title' | 'description'> & {
+        images: {
+          edges: Array<{node: Pick<StorefrontAPI.Image, 'url' | 'altText'>}>;
+        };
+        variants: {
+          edges: Array<{
+            node: {
+              price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+            };
+          }>;
+        };
+      }
+    >
+  >;
 };
 
 interface GeneratedQueryTypes {
@@ -1262,6 +1339,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query Footer(\n    $country: CountryCode\n    $footerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    menu(handle: $footerMenuHandle) {\n      ...Menu\n    }\n  }\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
     return: FooterQuery;
     variables: FooterQueryVariables;
+  };
+  '#graphql\n    query getCustomer($customerAccessToken: String!) {\n      customer(customerAccessToken: $customerAccessToken) {\n        firstName\n        lastName\n        email\n      }\n    }\n  ': {
+    return: GetCustomerQuery;
+    variables: GetCustomerQueryVariables;
   };
   '#graphql\n  query StoreRobots($country: CountryCode, $language: LanguageCode)\n   @inContext(country: $country, language: $language) {\n    shop {\n      id\n    }\n  }\n': {
     return: StoreRobotsQuery;
@@ -1303,6 +1384,14 @@ interface GeneratedQueryTypes {
     return: CatalogQuery;
     variables: CatalogQueryVariables;
   };
+  '#graphql\n    query GetCustomerWishlist($customerAccessToken: String!) {\n      customer(customerAccessToken: $customerAccessToken) {\n        metafield(namespace: "custom", key: "wishl") {\n          value\n        }\n      }\n    }\n  ': {
+    return: GetCustomerWishlistQuery;
+    variables: GetCustomerWishlistQueryVariables;
+  };
+  '#graphql\n      query GetWishlistProducts($ids: [ID!]!, $language: LanguageCode!) @inContext(language: $language) {\n        nodes(ids: $ids) {\n          ... on Product {\n            id\n            title\n            description\n            handle\n            vendor\n            featuredImage {\n              url\n              altText\n            }\n            priceRange {\n              minVariantPrice {\n                amount\n                currencyCode\n              }\n              maxVariantPrice {\n                amount\n                currencyCode\n              }\n            }\n            variants(first: 5) {\n              nodes {\n                id\n                title\n                price {\n                  amount\n                  currencyCode\n                }\n                image {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    ': {
+    return: GetWishlistProductsQuery;
+    variables: GetWishlistProductsQueryVariables;
+  };
   '#graphql\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      handle\n      id\n      title\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageQuery;
     variables: PageQueryVariables;
@@ -1330,6 +1419,10 @@ interface GeneratedQueryTypes {
   '#graphql\n    query GetCustomerWishlist($customerAccessToken: String!) {\n      customer(customerAccessToken: $customerAccessToken) {\n        metafield(namespace: "custom", key: "wishl") {\n          value \n        }\n      }\n    }\n  ': {
     return: GetCustomerWishlistQuery;
     variables: GetCustomerWishlistQueryVariables;
+  };
+  '#graphql\n    query GetProducts($ids: [ID!]!) {\n      nodes(ids: $ids) {\n        ... on Product {\n          id\n          title\n          description\n          images(first: 1) {\n            edges {\n              node {\n                url\n                altText\n              }\n            }\n          }\n          variants(first: 1) {\n            edges {\n              node {\n                price {\n                  amount\n                  currencyCode\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  ': {
+    return: GetProductsQuery;
+    variables: GetProductsQueryVariables;
   };
 }
 

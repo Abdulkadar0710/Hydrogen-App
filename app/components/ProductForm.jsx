@@ -2,6 +2,7 @@ import {Link, useLoaderData, useNavigate} from '@remix-run/react';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import { json } from '@shopify/remix-oxygen';
+import { useTranslation } from 'react-i18next'; 
 
 export async function loader({context}) {   
 //   const customerAccessToken = 'b6c74bd7c44c237f5b38471dffcf16d6'; // Replace with actual logic to get customer access token
@@ -52,7 +53,8 @@ export function ProductForm({productOptions, selectedVariant}) {
   const navigate = useNavigate();
   const {open} = useAside(); 
   const data = useLoaderData();
-  console.log("I am Dataaa: ", data); 
+  // console.log("I am Dataaa: ", data);
+  const {t} = useTranslation('common');
   return (
     <div className="product-form">
       {productOptions.map((option) => {
@@ -141,7 +143,6 @@ export function ProductForm({productOptions, selectedVariant}) {
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
           open('cart');
-          // handleAddToCart();
         }}
         lines={
           selectedVariant
@@ -155,7 +156,7 @@ export function ProductForm({productOptions, selectedVariant}) {
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {selectedVariant?.availableForSale ? t('Add to cart') : t('Sold out')}
       </AddToCartButton>
     </div>  
   );

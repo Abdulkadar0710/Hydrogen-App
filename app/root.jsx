@@ -15,11 +15,15 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
- 
+import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+
+
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
  */
+
 export const shouldRevalidate = ({formMethod, currentUrl, nextUrl}) => {
   // revalidate when a mutation is performed e.g add to cart, login...
   if (formMethod && formMethod !== 'GET') return true;
@@ -71,9 +75,35 @@ export async function loader(args) {
 
   const {storefront, env} = args.context;
 
+
+
+  const customerAccessToken = "5ccb00a6ce180d7b892f57cce0124e5d"; // Add your token here
+
+  const QUERY = `#graphql
+    query getCustomer($customerAccessToken: String!) {
+      customer(customerAccessToken: $customerAccessToken) {
+        firstName
+        lastName
+        email
+      }
+    }
+  `;
+
+  const data = await storefront.query(QUERY, {
+    variables: {
+      customerAccessToken,
+    },
+  });
+
+
+
+  
+
+
   return {
     ...deferredData,
     ...criticalData,
+    customerAccessToken: data,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -89,6 +119,8 @@ export async function loader(args) {
     },
   };
 }
+
+
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
@@ -147,6 +179,7 @@ export function Layout({children}) {
   const nonce = useNonce();
   /** @type {RootLoader} */
   const data = useRouteLoaderData('root');
+  // console.log('Layout data:', data);
 
   return (
     <html lang="en">
@@ -179,6 +212,9 @@ export function Layout({children}) {
 }
 
 export default function App() {
+  const data = useRouteLoaderData('root');
+  const { t } = useTranslation('common');
+ 
   return <Outlet />;
 }
 

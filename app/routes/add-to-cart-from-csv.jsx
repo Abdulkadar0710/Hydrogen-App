@@ -3,8 +3,10 @@ import  parse  from 'papaparse';
 
 export async function action({request, context}) {
 
+  console.log("Getting executed");
+
   const cartId = context.cart.getCartId();
-  console.log('Cart ID in Backend:', cartId);
+  // console.log('Cart ID in Backend:', cartId);
 
   if (request.method !== 'POST') {
     return json({error: 'Method not allowed'}, {status: 405});

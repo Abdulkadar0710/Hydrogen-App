@@ -15,8 +15,8 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
 import { useEffect, useState } from 'react';
-
-
+import { useTranslation } from 'react-i18next'; 
+import i18n from '~/i18n';
 
 
 /**
@@ -85,12 +85,23 @@ async function loadCriticalData({context, params, request}) {
     throw new Error('Expected product handle to be defined');
   }
 
+  const url = new URL(request.url);
+  let lang = url.searchParams.get('lang');
+  
+
   const [{product}] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
-      variables: {handle, selectedOptions: getSelectedProductOptions(request)},
+      variables: {handle, selectedOptions: getSelectedProductOptions(request),
+        language: lang =='en' ? 'EN' : 'FR',
+        country: 'US'
+      }  
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
+
+
+
+  console.log("Product: ",product);
 
   if (!product?.id) {
     throw new Response(null, {status: 404});
@@ -201,7 +212,7 @@ export default function Product() {
         });
   
         let data = await response.json();
-        data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
+        // data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
   
         const foundItem = data.find((item) => item.id === product.id);
         setFlag(foundItem ? false : true);
@@ -231,7 +242,7 @@ export default function Product() {
      });
 
     let data = await response.json();
-    data =  data.customer?.metafield?.value ? JSON.parse(data.customer?.metafield?.value) : [];
+    // data =  data ? JSON.parse(data) : [];
 
     // console.log("flag: ",flag); 
      if(flag){
@@ -266,6 +277,7 @@ export default function Product() {
       setFlag(!flag);
   };
   
+  const { t } = useTranslation('common');
 
 
   return (
@@ -288,7 +300,7 @@ export default function Product() {
         <br />
         <br />
         <p>
-          <strong>Description</strong>
+          <strong>{t('Description')}</strong>
         </p>
         <br />
         <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />

@@ -13,6 +13,7 @@ import {useAside} from './Aside';
  * }}
  */
 export function CartLineItem({layout, line}) {
+  // console.log("CartLineItem: ", line);
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);

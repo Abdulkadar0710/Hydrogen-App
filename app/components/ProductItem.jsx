@@ -1,6 +1,8 @@
 import {Link} from '@remix-run/react';
 import {Image, Money} from '@shopify/hydrogen';
+import { useTranslation } from 'react-i18next';
 import {useVariantUrl} from '~/lib/variants';
+import i18n from '~/i18n';
 
 /**
  * @param {{
@@ -14,12 +16,15 @@ import {useVariantUrl} from '~/lib/variants';
 export function ProductItem({product, loading}) {
   const variantUrl = useVariantUrl(product.handle);
   const image = product.featuredImage;
+
+  const { t } = useTranslation('common');
+
   return (
     <Link
       className="product-item"
       key={product.id}
       prefetch="intent"
-      to={variantUrl}
+      to={`${variantUrl}?lang=${i18n.language}`}
     >
       {image && (
         <Image
@@ -30,7 +35,7 @@ export function ProductItem({product, loading}) {
           sizes="(min-width: 45em) 400px, 100vw"
         />
       )}
-      <h4>{product.title}</h4>
+      <h4>{t(product.title)}</h4>
       <small>
         <Money data={product.priceRange.minVariantPrice} />
       </small>

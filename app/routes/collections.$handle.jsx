@@ -4,6 +4,7 @@ import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
+import { useTranslation } from 'react-i18next';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -76,12 +77,14 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
-  console.log('Collection data:', collection.products.nodes); 
+  console.log('Collection data:', collection); 
+
+  const { t } = useTranslation('common');
 
   return (
     <div className="collection">
-      <h1>{collection.title}</h1> 
-      <p className="collection-description">{collection.description}</p>
+      <h1>{t(collection.title)}</h1> 
+      <p className="collection-description">{t(collection.description)}</p>
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"

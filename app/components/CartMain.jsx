@@ -3,6 +3,7 @@ import {Link} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 import {CartLineItem} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
+import { useEffect } from 'react';
 
 /**
  * The main cart component that displays the cart items and summary.
@@ -13,6 +14,13 @@ export function CartMain({layout, cart: originalCart}) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
+
+  // console.log('CartMain', cart);
+
+  //   useEffect(() => {
+  //   console.log("Useeffect Cart: ", cart);
+  // }, [cart])
+
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
