@@ -165,6 +165,8 @@ export default function Checkout() {
   const fetcher = useFetcher();
   const error = fetcher.data?.error;
 
+  console.log('Cart data:', cart);
+
   const cartLines = cart.lines.edges.map(({node}) => ({
     id: node.id,
     variantId: node.merchandise.id,
@@ -176,14 +178,18 @@ export default function Checkout() {
   }));
 
   const [selectedCurrency, setSelectedCurrency] = useState('INR');
-  const currencies = ['INR', 'USD', 'EUR'];
+  const currencies = ['INR', 'USD'];
+
+  const usdtoCurrentCurrency = {
+    INR: 85.46,
+    USD: 1,
+  }
 
   useEffect(() => {
     const updateBuyerIdentity = async () => {
       const currencyToCountry = {
         INR: 'IN',
-        USD: 'US',
-        EUR: 'FR',
+        USD: 'US'
       };
       const countryCode = currencyToCountry[selectedCurrency];
 
@@ -225,12 +231,12 @@ export default function Checkout() {
           {cartLines.map((line) => (
             <li key={line.id} className="flex justify-between mb-2">
               <span>{line.productTitle} x {line.quantity}</span>
-              <span>{line.currency} {(line.price * line.quantity).toFixed(2)}</span>
+              <span>{ selectedCurrency } {(line.price * line.quantity * usdtoCurrentCurrency[selectedCurrency]).toFixed(2)}</span>
             </li>
           ))}
           <li className="flex justify-between font-bold border-t pt-2">
             <span>Total:</span>
-            <span>{cart.estimatedCost.totalAmount.currencyCode} {parseFloat(cart.estimatedCost.totalAmount.amount).toFixed(2)}</span>
+            <span>{ selectedCurrency } {parseFloat(cart.estimatedCost.totalAmount.amount * usdtoCurrentCurrency[selectedCurrency]).toFixed(2)}</span>
           </li>
         </ul>
       </section>

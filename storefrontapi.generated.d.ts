@@ -689,58 +689,6 @@ export type CatalogQuery = {
   };
 };
 
-export type GetCustomerWishlistQueryVariables = StorefrontAPI.Exact<{
-  customerAccessToken: StorefrontAPI.Scalars['String']['input'];
-}>;
-
-export type GetCustomerWishlistQuery = {
-  customer?: StorefrontAPI.Maybe<{
-    metafield?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
-  }>;
-};
-
-export type GetWishlistProductsQueryVariables = StorefrontAPI.Exact<{
-  ids:
-    | Array<StorefrontAPI.Scalars['ID']['input']>
-    | StorefrontAPI.Scalars['ID']['input'];
-  language: StorefrontAPI.LanguageCode;
-}>;
-
-export type GetWishlistProductsQuery = {
-  nodes: Array<
-    StorefrontAPI.Maybe<
-      Pick<
-        StorefrontAPI.Product,
-        'id' | 'title' | 'description' | 'handle' | 'vendor'
-      > & {
-        featuredImage?: StorefrontAPI.Maybe<
-          Pick<StorefrontAPI.Image, 'url' | 'altText'>
-        >;
-        priceRange: {
-          minVariantPrice: Pick<
-            StorefrontAPI.MoneyV2,
-            'amount' | 'currencyCode'
-          >;
-          maxVariantPrice: Pick<
-            StorefrontAPI.MoneyV2,
-            'amount' | 'currencyCode'
-          >;
-        };
-        variants: {
-          nodes: Array<
-            Pick<StorefrontAPI.ProductVariant, 'id' | 'title'> & {
-              price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
-              image?: StorefrontAPI.Maybe<
-                Pick<StorefrontAPI.Image, 'url' | 'altText'>
-              >;
-            }
-          >;
-        };
-      }
-    >
-  >;
-};
-
 export type CustomerAccessTokenCreateMutationVariables = StorefrontAPI.Exact<{
   input: StorefrontAPI.CustomerAccessTokenCreateInput;
 }>;
@@ -1306,16 +1254,31 @@ export type CustomerCreateMutation = {
   }>;
 };
 
+export type GetCustomerWishlistQueryVariables = StorefrontAPI.Exact<{
+  customerAccessToken: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type GetCustomerWishlistQuery = {
+  customer?: StorefrontAPI.Maybe<{
+    metafield?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+  }>;
+};
+
 export type GetProductsQueryVariables = StorefrontAPI.Exact<{
   ids:
     | Array<StorefrontAPI.Scalars['ID']['input']>
     | StorefrontAPI.Scalars['ID']['input'];
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
 }>;
 
 export type GetProductsQuery = {
   nodes: Array<
     StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.Product, 'id' | 'title' | 'description'> & {
+      Pick<
+        StorefrontAPI.Product,
+        'id' | 'title' | 'description' | 'handle' | 'vendor'
+      > & {
         images: {
           edges: Array<{node: Pick<StorefrontAPI.Image, 'url' | 'altText'>}>;
         };
@@ -1384,14 +1347,6 @@ interface GeneratedQueryTypes {
     return: CatalogQuery;
     variables: CatalogQueryVariables;
   };
-  '#graphql\n    query GetCustomerWishlist($customerAccessToken: String!) {\n      customer(customerAccessToken: $customerAccessToken) {\n        metafield(namespace: "custom", key: "wishl") {\n          value\n        }\n      }\n    }\n  ': {
-    return: GetCustomerWishlistQuery;
-    variables: GetCustomerWishlistQueryVariables;
-  };
-  '#graphql\n      query GetWishlistProducts($ids: [ID!]!, $language: LanguageCode!) @inContext(language: $language) {\n        nodes(ids: $ids) {\n          ... on Product {\n            id\n            title\n            description\n            handle\n            vendor\n            featuredImage {\n              url\n              altText\n            }\n            priceRange {\n              minVariantPrice {\n                amount\n                currencyCode\n              }\n              maxVariantPrice {\n                amount\n                currencyCode\n              }\n            }\n            variants(first: 5) {\n              nodes {\n                id\n                title\n                price {\n                  amount\n                  currencyCode\n                }\n                image {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    ': {
-    return: GetWishlistProductsQuery;
-    variables: GetWishlistProductsQueryVariables;
-  };
   '#graphql\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      handle\n      id\n      title\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageQuery;
     variables: PageQueryVariables;
@@ -1420,7 +1375,7 @@ interface GeneratedQueryTypes {
     return: GetCustomerWishlistQuery;
     variables: GetCustomerWishlistQueryVariables;
   };
-  '#graphql\n    query GetProducts($ids: [ID!]!) {\n      nodes(ids: $ids) {\n        ... on Product {\n          id\n          title\n          description\n          images(first: 1) {\n            edges {\n              node {\n                url\n                altText\n              }\n            }\n          }\n          variants(first: 1) {\n            edges {\n              node {\n                price {\n                  amount\n                  currencyCode\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  ': {
+  '#graphql\n  query GetProducts($ids: [ID!]!, $language: LanguageCode, $country: CountryCode) \n  @inContext(language: $language, country: $country) { \n    nodes(ids: $ids) { \n      ... on Product { \n        id\n        title\n        description\n        handle\n        vendor\n        images(first: 1) {\n          edges {\n            node {\n              url\n              altText\n            }\n          }\n        }\n        variants(first: 1) {\n          edges {\n            node {\n              price {\n                amount\n                currencyCode\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: GetProductsQuery;
     variables: GetProductsQueryVariables;
   };

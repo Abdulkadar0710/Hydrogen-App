@@ -26,10 +26,10 @@ export async function loader({ context, request }) {
 
 
   const PRODUCT_QUERY = `#graphql
-  query GetProducts($ids: [ID!]!, $language: LanguageCode, $country: CountryCode)
-  @inContext(language: $language, country: $country) {
-    nodes(ids: $ids) {
-      ... on Product {
+  query GetProducts($ids: [ID!]!, $language: LanguageCode, $country: CountryCode) 
+  @inContext(language: $language, country: $country) { 
+    nodes(ids: $ids) { 
+      ... on Product { 
         id
         title
         description
@@ -69,11 +69,24 @@ const wishlistIds = response?.customer?.metafield?.value
     const language = url.searchParams.get('lang');
     console.log("Language: ", language);
 
+    let lang = 'en';
+    let country = 'US';
+    if (language === 'fr') {
+      lang = 'FR';
+      country = 'FR';
+    } else if (language === 'hi') {
+      lang = 'HI';
+      country = 'IN';
+    } else {
+      lang = 'EN';
+      country = 'US';
+    }
+
     const productResponse = await context.storefront.query(PRODUCT_QUERY, {
       variables: {
         ids,
-        language: language == 'fr' ? 'FR' : 'EN',
-        country: 'US' 
+        language: lang,
+        country: country
       },
     });
 

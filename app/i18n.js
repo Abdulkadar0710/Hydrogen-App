@@ -5,6 +5,7 @@ import { initReactI18next } from 'react-i18next';
 
 import translationEN from '../locales/en/common.json';
 import translationFR from '../locales/fr/common.json';
+import translationHI from '../locales/hi/common.json';
 import Backend from 'i18next-http-backend';
 
 // .use(LanguageDetector)
@@ -13,10 +14,11 @@ i18n
   .use(Backend)
   .init({
     fallbackLng: 'en',
-    supportedLngs: ['en', 'fr'],
+    supportedLngs: ['en', 'fr', 'hi'],
     resources: {
       fr: { common: translationFR },
       en: { common: translationEN },
+      hi: { common: translationHI },
     },
     ns: ['common'],
     defaultNS: 'common',

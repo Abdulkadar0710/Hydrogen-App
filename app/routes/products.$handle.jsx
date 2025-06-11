@@ -86,14 +86,28 @@ async function loadCriticalData({context, params, request}) {
   }
 
   const url = new URL(request.url);
-  let lang = url.searchParams.get('lang');
+  let language = url.searchParams.get('lang');
+  
+
+  let lang = 'en';
+  let country = 'US';
+  if (language === 'fr') {
+    lang = 'FR';
+    country = 'FR';
+  } else if (language === 'hi') {
+    lang = 'HI';
+    country = 'IN';
+  } else {
+    lang = 'EN';
+    country = 'US';
+  }
   
 
   const [{product}] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {handle, selectedOptions: getSelectedProductOptions(request),
-        language: lang =='en' ? 'EN' : 'FR',
-        country: 'US'
+        language: lang,
+        country: country,
       }  
     }),
     // Add other queries here, so that they are loaded in parallel
@@ -172,6 +186,9 @@ export default function Product() {
   });
 
   const {title, descriptionHtml} = product;
+
+  console.log("Title: ",title);
+  console.log("Description HTML: ",descriptionHtml);
 
   const getProductId = (id) => {
     const productId = id.split('/').pop();

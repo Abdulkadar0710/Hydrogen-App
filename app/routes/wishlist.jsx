@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import i18n from '~/i18n';
+import { useTranslation } from 'react-i18next';
 
 
 export async function loader({ context, request }) {
@@ -152,6 +153,9 @@ const fetchDataFromUrl = async () => {
   //  console.log("Product ID: ", productId);
    return productId;
   }
+   
+  const { i18n } = useTranslation();
+  console.log("Current Language: ", i18n.language);
 
   return (
     <div>
@@ -167,7 +171,7 @@ const fetchDataFromUrl = async () => {
                <div className="">{item.title}</div>
                <div>{item.description}</div>
                <div>{item.price}</div>
-               <Link to={`/products/${item.handle}`} className="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+               <Link to={`/products/${item.handle}?lang=${ i18n.language }`} className="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 View Product
                </Link>
                <div className="lhParent" onClick={()=>removeFronCart(item.id)}>{ flag ? <FaHeart/> : <CiHeart/>}</div>
